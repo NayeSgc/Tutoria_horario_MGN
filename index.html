@@ -1,1 +1,589 @@
-Horario Semanal Realista - Tutoría FI
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sesión 3: Horario Semanal Realista | Tutoría Facultad de Ingeniería UNAM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons para iconografía moderna -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        unam: {
+                            blue: '#002B49', // Azul institucional UNAM
+                            gold: '#D4AF37', // Oro UNAM
+                            darkBlue: '#001A2C',
+                            lightGold: '#FFF8E7',
+                        },
+                        cat: {
+                            C: '#2563eb', // Clase
+                            T: '#ea580c', // Traslado
+                            E: '#16a34a', // Estudio activo
+                            D: '#d97706', // Descanso
+                            P: '#9333ea', // Personal
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Estilos personalizados */
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        .category-selected {
+            ring: 3px solid #002B49;
+            transform: scale(1.03);
+        }
+
+        .cell-C { background-color: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+        .cell-T { background-color: #ffedd5; color: #9a3412; border-color: #fed7aa; }
+        .cell-E { background-color: #dcfce7; color: #166534; border-color: #bbf7d0; }
+        .cell-D { background-color: #fef3c7; color: #92400e; border-color: #fde68a; }
+        .cell-P { background-color: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
+
+        /* Estilos de Impresión @media print */
+        @media print {
+            @page {
+                size: letter portrait;
+                margin: 10mm;
+            }
+
+            body {
+                background: white !important;
+                color: black !important;
+                font-size: 11px !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .print-only {
+                display: block !important;
+            }
+
+            .print-container {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+            }
+
+            /* Forzar salto de página adecuado si fuera necesario */
+            .page-break {
+                page-break-before: always;
+            }
+
+            /* Optimización de tabla de horario en PDF */
+            .schedule-grid {
+                border-collapse: collapse !important;
+                width: 100% !important;
+            }
+
+            .schedule-grid th, .schedule-grid td {
+                border: 1px solid #94a3b8 !important;
+                padding: 3px !important;
+                font-size: 10px !important;
+            }
+
+            /* Conservar colores de fondo al imprimir */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .bg-unam-blue {
+                background-color: #002B49 !important;
+                color: white !important;
+            }
+
+            .badge-print {
+                border: 1px solid #cbd5e1 !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <header class="no-print bg-unam-blue text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="bg-unam-gold text-unam-blue font-bold px-2.5 py-1 rounded-md text-sm tracking-wider">
+                    UNAM - FI
+                </div>
+                <div>
+                    <h1 class="text-base font-bold leading-tight">Programa Institucional de Tutoría</h1>
+                    <p class="text-xs text-slate-300">Herramienta Interactiva - Sesión 3</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <button onclick="resetForm()" class="px-3 py-1.5 rounded-lg border border-slate-400 hover:bg-slate-800 text-xs text-slate-200 transition flex items-center gap-1.5">
+                    <i class="ph ph-arrows-counter-clockwise text-base"></i> Reiniciar
+                </button>
+                <button onclick="window.print()" class="px-4 py-1.5 rounded-lg bg-unam-gold hover:bg-yellow-500 text-unam-blue font-bold text-xs transition shadow flex items-center gap-1.5">
+                    <i class="ph ph-printer text-base"></i> Imprimir Horario / PDF
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 pt-6 print-container">
+        
+        <!-- Tarjeta Principal tipo Documento -->
+        <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-6 md:p-8 print:p-0 print:border-none print:shadow-none">
+            
+            <!-- ENCABEZADO INSTITUCIONAL -->
+            <div class="border-b-2 border-unam-blue pb-5 mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-unam-blue text-unam-gold rounded-xl flex items-center justify-center font-bold text-2xl shadow-inner border border-unam-gold/30 flex-shrink-0">
+                            FI
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Programa Institucional de Tutoría • Facultad de Ingeniería UNAM</span>
+                            <h2 class="text-xl md:text-2xl font-extrabold text-unam-blue">
+                                Sesión 3: Horario Semanal Realista
+                            </h2>
+                            <p class="text-sm font-medium text-amber-700">Gestión del tiempo y ritmo universitario</p>
+                        </div>
+                    </div>
+                    <div class="text-right hidden md:block no-print">
+                        <span class="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 font-medium px-2.5 py-1 rounded-full border border-blue-200">
+                            <i class="ph ph-info"></i> Dimensión: Gestión Académica
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Campos de Registro -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre del estudiante:</label>
+                        <input type="text" id="studentName" placeholder="Ej. Ana Lucía Gómez Pérez" 
+                               class="w-full bg-white px-3 py-1.5 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-unam-blue focus:border-transparent outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Grupo / Carrera:</label>
+                        <input type="text" id="studentGroup" placeholder="Ej. Grupo 04 / Ingeniería Mecatrónica" 
+                               class="w-full bg-white px-3 py-1.5 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-unam-blue focus:border-transparent outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha:</label>
+                        <input type="date" id="sessionDate" 
+                               class="w-full bg-white px-3 py-1.5 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-unam-blue focus:border-transparent outline-none transition">
+                    </div>
+                </div>
+            </div>
+
+            <!-- LAYOUT DE 2 COLUMNAS: MATRIZ Y PANEL LATERAL (no-print para panel lateral) -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                
+                <!-- COLUMNA PRINCIPAL (SECCIONES A, B, C, D) -->
+                <div class="lg:col-span-3 space-y-8">
+                    
+                    <!-- SECCIÓN A: LIENZO INTERACTIVO DE HORARIO -->
+                    <section>
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                            <div>
+                                <h3 class="text-base font-bold text-unam-blue flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded-full bg-unam-blue text-white text-xs flex items-center justify-center font-bold">A</span>
+                                    Mi Horario Real (Llena primero lo que ya tienes)
+                                </h3>
+                                <p class="text-xs text-slate-500">Haz clic en una categoría para seleccionar el color y luego en las celdas del horario.</p>
+                            </div>
+                        </div>
+
+                        <!-- Paleta de Categorías Seleccionables (Selector de Color) -->
+                        <div class="no-print bg-slate-100 p-3 rounded-xl mb-4 border border-slate-200">
+                            <span class="block text-xs font-bold text-slate-700 mb-2">1. Selecciona la categoría con la que vas a pintar:</span>
+                            <div class="flex flex-wrap gap-2" id="categoryPalette">
+                                <button type="button" onclick="selectCategory('C')" data-cat="C" class="cat-btn category-selected flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm bg-blue-600 text-white">
+                                    <i class="ph ph-chalkboard-teacher text-sm"></i>
+                                    <span>[C] Clase</span>
+                                </button>
+                                <button type="button" onclick="selectCategory('T')" data-cat="T" class="cat-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm bg-orange-600 text-white opacity-70 hover:opacity-100">
+                                    <i class="ph ph-bus text-sm"></i>
+                                    <span>[T] Traslado</span>
+                                </button>
+                                <button type="button" onclick="selectCategory('E')" data-cat="E" class="cat-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm bg-green-600 text-white opacity-70 hover:opacity-100">
+                                    <i class="ph ph-book-open text-sm"></i>
+                                    <span>[E] Estudio activo</span>
+                                </button>
+                                <button type="button" onclick="selectCategory('D')" data-cat="D" class="cat-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm bg-amber-600 text-white opacity-70 hover:opacity-100">
+                                    <i class="ph ph-coffee text-sm"></i>
+                                    <span>[D] Descanso</span>
+                                </button>
+                                <button type="button" onclick="selectCategory('P')" data-cat="P" class="cat-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm bg-purple-600 text-white opacity-70 hover:opacity-100">
+                                    <i class="ph ph-user text-sm"></i>
+                                    <span>[P] Personal</span>
+                                </button>
+                                <button type="button" onclick="selectCategory('')" data-cat="" class="cat-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm bg-slate-300 text-slate-800 opacity-70 hover:opacity-100 ml-auto">
+                                    <i class="ph ph-eraser text-sm"></i>
+                                    <span>Limpiar Celda</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Leyenda estática para la impresión PDF -->
+                        <div class="hidden print:flex flex-wrap gap-3 mb-2 text-xs font-medium">
+                            <span class="font-bold">Claves de Color:</span>
+                            <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 border border-blue-300"><b>C:</b> Clase</span>
+                            <span class="px-2 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-300"><b>T:</b> Traslado</span>
+                            <span class="px-2 py-0.5 rounded bg-green-100 text-green-800 border border-green-300"><b>E:</b> Estudio activo</span>
+                            <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300"><b>D:</b> Descanso</span>
+                            <span class="px-2 py-0.5 rounded bg-purple-100 text-purple-800 border border-purple-300"><b>P:</b> Personal</span>
+                        </div>
+
+                        <!-- MATRIZ DE HORARIO -->
+                        <div class="overflow-x-auto rounded-xl border border-slate-300 shadow-sm">
+                            <table class="w-full text-xs text-left border-collapse schedule-grid">
+                                <thead>
+                                    <tr class="bg-unam-blue text-white text-center font-bold">
+                                        <th class="p-2 border border-slate-700 w-20 bg-unam-darkBlue">Horario</th>
+                                        <th class="p-2 border border-slate-700">Lun</th>
+                                        <th class="p-2 border border-slate-700">Mar</th>
+                                        <th class="p-2 border border-slate-700">Mié</th>
+                                        <th class="p-2 border border-slate-700">Jue</th>
+                                        <th class="p-2 border border-slate-700">Vie</th>
+                                        <th class="p-2 border border-slate-700">Sáb</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scheduleBody">
+                                    <!-- Generado dinámicamente mediante JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- SECCIÓN B: VERIFICACIÓN DEL HORARIO -->
+                    <section class="bg-amber-50/50 p-5 rounded-xl border border-amber-200">
+                        <h3 class="text-base font-bold text-unam-blue flex items-center gap-2 mb-2">
+                            <span class="w-6 h-6 rounded-full bg-unam-blue text-white text-xs flex items-center justify-center font-bold">B</span>
+                            Verificación del Horario
+                        </h3>
+                        <p class="text-xs text-slate-600 mb-3">Marca los aspectos que realmente cumple tu horario diseñado:</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                            <label class="flex items-center gap-2.5 p-2.5 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-amber-100/50 transition">
+                                <input type="checkbox" id="checkTraslado" class="w-4 h-4 text-unam-blue rounded border-slate-300 focus:ring-unam-blue">
+                                <span class="font-medium text-slate-800">Incluí tiempo de traslado</span>
+                            </label>
+
+                            <label class="flex items-center gap-2.5 p-2.5 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-amber-100/50 transition">
+                                <input type="checkbox" id="checkDescanso" class="w-4 h-4 text-unam-blue rounded border-slate-300 focus:ring-unam-blue">
+                                <span class="font-medium text-slate-800">Incluí bloques de descanso</span>
+                            </label>
+
+                            <label class="flex items-center gap-2.5 p-2.5 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-amber-100/50 transition">
+                                <input type="checkbox" id="checkEstudio" class="w-4 h-4 text-unam-blue rounded border-slate-300 focus:ring-unam-blue">
+                                <span class="font-medium text-slate-800">Incluí estudio activo (no solo repasos)</span>
+                            </label>
+
+                            <label class="flex items-center gap-2.5 p-2.5 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-amber-100/50 transition">
+                                <input type="checkbox" id="checkRealista" class="w-4 h-4 text-unam-blue rounded border-slate-300 focus:ring-unam-blue">
+                                <span class="font-medium text-slate-800">Es realista para esta semana</span>
+                            </label>
+                        </div>
+                    </section>
+
+                    <!-- SECCIÓN C & D EN DOS COLUMNAS -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <!-- SECCIÓN C: MI BLOQUE INTOCABLE -->
+                        <section class="bg-blue-50/50 p-5 rounded-xl border border-blue-200 flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-base font-bold text-unam-blue flex items-center gap-2 mb-3">
+                                    <span class="w-6 h-6 rounded-full bg-unam-blue text-white text-xs flex items-center justify-center font-bold">C</span>
+                                    Mi Bloque Intocable
+                                </h3>
+                                
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                            ¿Cuál es tu asignatura más difícil este semestre?
+                                        </label>
+                                        <input type="text" id="hardSubject" placeholder="Ej. Cálculo Diferencial / Álgebra Lineal" 
+                                               class="w-full bg-white px-3 py-1.5 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-unam-blue focus:border-transparent outline-none">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                            ¿Qué día y hora dedicarás exclusivamente a esa asignatura cada semana?
+                                        </label>
+                                        <input type="text" id="untouchableBlock" placeholder="Ej. Martes y Jueves de 15:00 a 17:00 h" 
+                                               class="w-full bg-white px-3 py-1.5 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-unam-blue focus:border-transparent outline-none">
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- SECCIÓN D: UN CAMBIO CONCRETO -->
+                        <section class="bg-emerald-50/50 p-5 rounded-xl border border-emerald-200 flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-base font-bold text-unam-blue flex items-center gap-2 mb-3">
+                                    <span class="w-6 h-6 rounded-full bg-unam-blue text-white text-xs flex items-center justify-center font-bold">D</span>
+                                    Un Cambio Concreto
+                                </h3>
+                                
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                        ¿Qué ajuste haré en mi tiempo esta semana para mejorar mi desempeño?
+                                    </label>
+                                    <textarea id="concreteChange" rows="4" placeholder="Ej. Dormir a las 23:00 h en lugar de desvelarme, o usar el tiempo de traslado en autobús para repasar la guía..." 
+                                              class="w-full bg-white p-3 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-unam-blue focus:border-transparent outline-none resize-none"></textarea>
+                                </div>
+                            </div>
+                        </section>
+
+                    </div>
+
+                    <!-- FIRMA / EVIDENCIA TUTORIAL PARA IMPRESIÓN -->
+                    <div class="pt-6 border-t border-slate-200 mt-8 text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div>
+                            <p class="font-semibold text-slate-700">Evidencia de Trabajo Tutorial - Facultad de Ingeniería UNAM</p>
+                            <p>Documento listo para integración a la BitácoraFI / Sistema TutorFI.</p>
+                        </div>
+                        <div class="text-center sm:text-right border-t sm:border-t-0 pt-2 sm:pt-0 w-full sm:w-auto">
+                            <div class="w-48 border-b border-slate-400 mb-1 mx-auto sm:ml-auto"></div>
+                            <p class="font-medium text-slate-600">Firma del Estudiante / Tutor</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- COLUMNA LATERAL: PRINCIPIOS Y CONSEJOS TUTORIALES (Oculto en Impresión) -->
+                <aside class="no-print space-y-6">
+                    
+                    <div class="bg-gradient-to-br from-unam-blue to-unam-darkBlue text-white p-5 rounded-2xl shadow-lg border border-unam-gold/30">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i class="ph ph-lightbulb text-unam-gold text-2xl"></i>
+                            <h4 class="font-extrabold text-sm text-unam-gold uppercase tracking-wider">Claves de Tutoría FI</h4>
+                        </div>
+                        <ul class="space-y-3 text-xs text-slate-200 leading-relaxed">
+                            <li class="flex items-start gap-2">
+                                <i class="ph ph-check-circle text-unam-gold text-base shrink-0 mt-0.5"></i>
+                                <span><b>La Honestidad es Clave:</b> La diferencia entre un buen horario y uno que no se usa es la sinceridad al reflejar tu semana real.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="ph ph-check-circle text-unam-gold text-base shrink-0 mt-0.5"></i>
+                                <span><b>Regla Básica de Estudio:</b> Destina <b>1 hora de estudio activo</b> por cada hora de clase presencial a la semana.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="ph ph-check-circle text-unam-gold text-base shrink-0 mt-0.5"></i>
+                                <span><b>Sesiones Cortas y Constantes:</b> Programa bloques de <b>45 a 90 minutos</b>. Estudiar 5 horas seguidas causa agotamiento y abandono.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="ph ph-check-circle text-unam-gold text-base shrink-0 mt-0.5"></i>
+                                <span><b>Contempla el Descanso y Traslado:</b> Si sales de casa a las 5:30 am, necesitas incluir descanso reparador por la tarde.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-xs space-y-3">
+                        <h4 class="font-bold text-slate-800 flex items-center gap-1.5">
+                            <i class="ph ph-question text-base text-blue-600"></i> ¿Cómo usar esta herramienta?
+                        </h4>
+                        <ol class="list-decimal list-inside space-y-1.5 text-slate-600">
+                            <li>Elige la categoría arriba de la tabla.</li>
+                            <li>Haz clic en las celdas del horario para asignar el tipo de actividad.</li>
+                            <li>Escribe notas específicas en las celdas si lo requieres.</li>
+                            <li>Completa el checklist y las preguntas de reflexión.</li>
+                            <li>Haz clic en <b>Imprimir Horario / PDF</b> para entregar a tu tutor.</li>
+                        </ol>
+                    </div>
+
+                    <!-- Cita inspiradora de la guía -->
+                    <div class="p-4 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 text-xs italic">
+                        "Un horario útil no es el ideal ni el perfecto; es el que realmente se puede cumplir y sostener."
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        // Rangos de horas definidos en la guía
+        const timeSlots = [
+            '5-7 h', '7-9 h', '9-11 h', '11-13 h', 
+            '13-15 h', '15-17 h', '17-19 h', '19-21 h', '21-23 h'
+        ];
+
+        const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+        // Estado actual de categoría seleccionada
+        let selectedCategory = 'C'; // Por defecto: Clase (Azul)
+
+        // Inicialización al cargar el documento
+        window.onload = function() {
+            // Establecer fecha de hoy por defecto
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('sessionDate').value = today;
+
+            // Renderizar la tabla de horario
+            renderScheduleGrid();
+
+            // Intentar cargar datos de localStorage si existen
+            loadSavedData();
+        };
+
+        // Función para cambiar la categoría activa en la paleta
+        function selectCategory(cat) {
+            selectedCategory = cat;
+            
+            // Actualizar interfaz visual de botones de la paleta
+            const buttons = document.querySelectorAll('.cat-btn');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('data-cat') === cat) {
+                    btn.classList.add('category-selected', 'opacity-100');
+                    btn.classList.remove('opacity-70');
+                } else {
+                    btn.classList.remove('category-selected');
+                    btn.classList.add('opacity-70');
+                }
+            });
+        }
+
+        // Renderizar dinámicamente las celdas del horario
+        function renderScheduleGrid() {
+            const tbody = document.getElementById('scheduleBody');
+            tbody.innerHTML = '';
+
+            timeSlots.forEach((slot, rowIndex) => {
+                const tr = document.createElement('tr');
+                
+                // Columna de Horario
+                const tdTime = document.createElement('td');
+                tdTime.className = 'p-2 border border-slate-300 font-bold bg-slate-100 text-slate-700 text-center text-xs whitespace-nowrap';
+                tdTime.innerText = slot;
+                tr.appendChild(tdTime);
+
+                // Columnas de Días (Lunes a Sábado)
+                days.forEach((day, colIndex) => {
+                    const td = document.createElement('td');
+                    td.className = 'p-1 border border-slate-300 align-top transition-colors cursor-pointer min-w-[90px] h-12 relative';
+                    td.dataset.row = rowIndex;
+                    td.dataset.col = colIndex;
+
+                    // Al hacer clic en la celda se aplica la categoría actual
+                    td.onclick = function(e) {
+                        // Evitar repintar si el clic fue dentro del textarea de notas
+                        if (e.target.tagName.toLowerCase() === 'textarea') return;
+                        applyCategoryToCell(td, selectedCategory);
+                    };
+
+                    // Área de texto interno opcional
+                    const noteArea = document.createElement('textarea');
+                    noteArea.className = 'w-full h-full bg-transparent resize-none border-none outline-none text-[10px] leading-tight font-medium p-0.5';
+                    noteArea.placeholder = '...';
+                    noteArea.onchange = saveData;
+
+                    td.appendChild(noteArea);
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Aplicar clase/categoría a una celda
+        function applyCategoryToCell(cell, cat) {
+            // Limpiar clases anteriores de categoría
+            cell.classList.remove('cell-C', 'cell-T', 'cell-E', 'cell-D', 'cell-P');
+            cell.dataset.cat = cat;
+
+            if (cat) {
+                cell.classList.add(`cell-${cat}`);
+            }
+
+            saveData();
+        }
+
+        // Guardar estado actual en localStorage
+        function saveData() {
+            const gridData = [];
+            const cells = document.querySelectorAll('#scheduleBody td[data-row]');
+            
+            cells.forEach(cell => {
+                const row = cell.dataset.row;
+                const col = cell.dataset.col;
+                const cat = cell.dataset.cat || '';
+                const text = cell.querySelector('textarea').value;
+                
+                if (cat || text) {
+                    gridData.push({ row, col, cat, text });
+                }
+            });
+
+            const formData = {
+                studentName: document.getElementById('studentName').value,
+                studentGroup: document.getElementById('studentGroup').value,
+                sessionDate: document.getElementById('sessionDate').value,
+                checkTraslado: document.getElementById('checkTraslado').checked,
+                checkDescanso: document.getElementById('checkDescanso').checked,
+                checkEstudio: document.getElementById('checkEstudio').checked,
+                checkRealista: document.getElementById('checkRealista').checked,
+                hardSubject: document.getElementById('hardSubject').value,
+                untouchableBlock: document.getElementById('untouchableBlock').value,
+                concreteChange: document.getElementById('concreteChange').value,
+                gridData: gridData
+            };
+
+            localStorage.setItem('tutoria_sesion3_data', JSON.stringify(formData));
+        }
+
+        // Cargar datos guardados previamente
+        function loadSavedData() {
+            const saved = localStorage.getItem('tutoria_sesion3_data');
+            if (!saved) return;
+
+            try {
+                const formData = JSON.parse(saved);
+                
+                document.getElementById('studentName').value = formData.studentName || '';
+                document.getElementById('studentGroup').value = formData.studentGroup || '';
+                if (formData.sessionDate) document.getElementById('sessionDate').value = formData.sessionDate;
+
+                document.getElementById('checkTraslado').checked = !!formData.checkTraslado;
+                document.getElementById('checkDescanso').checked = !!formData.checkDescanso;
+                document.getElementById('checkEstudio').checked = !!formData.checkEstudio;
+                document.getElementById('checkRealista').checked = !!formData.checkRealista;
+
+                document.getElementById('hardSubject').value = formData.hardSubject || '';
+                document.getElementById('untouchableBlock').value = formData.untouchableBlock || '';
+                document.getElementById('concreteChange').value = formData.concreteChange || '';
+
+                if (formData.gridData && Array.isArray(formData.gridData)) {
+                    formData.gridData.forEach(item => {
+                        const cell = document.querySelector(`#scheduleBody td[data-row="${item.row}"][data-col="${item.col}"]`);
+                        if (cell) {
+                            applyCategoryToCell(cell, item.cat);
+                            cell.querySelector('textarea').value = item.text || '';
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Error al cargar datos guardados:", e);
+            }
+        }
+
+        // Event listeners para autoguardado de campos de texto
