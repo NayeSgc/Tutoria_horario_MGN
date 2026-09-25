@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sesión 3: Horario Semanal | Tutoría FI UNAM</title>
-    <!-- Tailwind CSS desde CDN -->
+    <title>Sesión 3: Horario Semanal Realista (Hora a Hora) | Tutoría FI UNAM</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Phosphor Icons para iconografía -->
+    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <script>
@@ -18,19 +18,10 @@
                 extend: {
                     colors: {
                         unam: {
-                            blue: '#002147',   // Azul Marino UNAM
-                            gold: '#D4AC0D',   // Oro UNAM
+                            blue: '#002147',
+                            gold: '#D4AC0D',
                             darkBlue: '#00142D',
                             lightGold: '#FEF9E7',
-                        },
-                        cat: {
-                            C: '#2563eb', // Clases / Laboratorios
-                            E: '#16a34a', // Estudio Autónomo / Tareas
-                            T: '#ea580c', // Traslado / Transporte
-                            S: '#4f46e5', // Sueño / Descanso nocturno
-                            A: '#0284c7', // Alimentación / Cuidado Personal
-                            W: '#9333ea', // Trabajo / Compromisos Familiares
-                            D: '#d97706', // Ocio / Recreación / Deporte
                         }
                     },
                     fontFamily: {
@@ -62,25 +53,21 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        /* Ajustes específicos para impresión PDF */
+        /* Ajustes para impresión / PDF */
         @media print {
             @page {
                 size: letter portrait;
-                margin: 8mm;
+                margin: 6mm;
             }
 
             body {
                 background: white !important;
                 color: black !important;
-                font-size: 10px !important;
+                font-size: 9px !important;
             }
 
             .no-print {
                 display: none !important;
-            }
-
-            .print-only {
-                display: block !important;
             }
 
             .print-container {
@@ -99,27 +86,24 @@
             .schedule-table th, .schedule-table td {
                 border: 1px solid #64748b !important;
                 padding: 1px 2px !important;
-                font-size: 8.5px !important;
-                height: 18px !important;
+                font-size: 8px !important;
+                height: 16px !important;
             }
 
             .schedule-table textarea {
-                font-size: 8px !important;
+                font-size: 7.5px !important;
             }
 
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-
-            .page-break {
-                page-break-before: always;
-            }
         }
     </style>
 </head>
 <body class="min-h-screen pb-12 font-sans">
 
+    <!-- Header Principal -->
     <header class="no-print bg-unam-blue text-white shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
             <div class="flex items-center gap-3">
@@ -128,7 +112,7 @@
                 </div>
                 <div>
                     <h1 class="text-base font-bold leading-tight">Programa Institucional de Tutoría</h1>
-                    <p class="text-xs text-slate-300">Sesión 3: Horario Semanal </p>
+                    <p class="text-xs text-slate-300">Sesión 3: Horario Semanal Realista (04:00 h a 23:00 h)</p>
                 </div>
             </div>
             
@@ -147,52 +131,87 @@
         
         <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-5 md:p-8 print:p-0 print:border-none print:shadow-none">
             
-            <!-- ENCABEZADO OFICIAL INSTITUCIONAL -->
+            <!-- ENCABEZADO INSTITUCIONAL -->
             <div class="border-b-2 border-unam-blue pb-4 mb-6">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-14 h-14 bg-unam-blue text-unam-gold rounded-xl flex items-center justify-center font-black text-2xl shadow-inner border border-unam-gold/40 flex-shrink-0">
+                        <div class="w-12 h-12 bg-unam-blue text-unam-gold rounded-xl flex items-center justify-center font-black text-xl shadow-inner border border-unam-gold/40 flex-shrink-0">
                             FI
                         </div>
                         <div>
-                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Universidad Nacional Autónoma de México • Facultad de Ingeniería</span>
+                            <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Universidad Nacional Autónoma de México • Facultad de Ingeniería</span>
                             <h2 class="text-xl md:text-2xl font-black text-unam-blue">
-                                Sesión 3: Horario Semanal
+                                Sesión 3: Horario Semanal Realista
                             </h2>
-                       <p class="text-xs font-medium text-amber-800">Planificación hora a hora para la gestión efectiva del tiempo universitario</p>
+                            <p class="text-xs font-medium text-amber-800">Diseño de horario acotado de 04:00 h a 23:00 h para el desempeño académico y el autocuidado</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mt-5 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <!-- DATOS GENERALES -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mt-4 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Nombre del Alumno/a:</label>
+                        <label class="block text-[11px] font-bold text-slate-700 mb-0.5">Nombre del Alumno/a:</label>
                         <input type="text" id="studentName" placeholder="Ej. Ana Lucía Gómez" 
                                class="w-full bg-white px-2.5 py-1 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-unam-blue outline-none">
                     </div>
-                     <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Carrera </label>
-                        <input type="text" id="studentCareer" placeholder="Ej. Computación " 
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 mb-0.5">No. de Cuenta:</label>
+                        <input type="text" id="accountNum" placeholder="Ej. 319012345" 
                                class="w-full bg-white px-2.5 py-1 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-unam-blue outline-none">
                     </div>
-                    
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Fecha:</label>
+                        <label class="block text-[11px] font-bold text-slate-700 mb-0.5">Carrera / Semestre:</label>
+                        <input type="text" id="studentCareer" placeholder="Ej. Computación / 1er Sem" 
+                               class="w-full bg-white px-2.5 py-1 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-unam-blue outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 mb-0.5">Nombre del Tutor/a:</label>
+                        <input type="text" id="tutorName" placeholder="Ej. Dr. Roberto Martínez" 
+                               class="w-full bg-white px-2.5 py-1 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-unam-blue outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 mb-0.5">Fecha:</label>
                         <input type="date" id="sessionDate" 
                                class="w-full bg-white px-2.5 py-1 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-unam-blue outline-none">
                     </div>
                 </div>
             </div>
 
-            <section class="mb-6 bg-slate-100/80 p-4 rounded-xl border border-slate-200 no-print">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <!-- PANEL DE ALERTAS EN TIEMPO REAL (FALTAN HORARIOS DE SUEÑO / COMIDA) -->
+            <section class="no-print mb-5 grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div id="foodAlertCard" class="p-3 rounded-xl border flex items-start gap-3 bg-amber-50 border-amber-300 transition-all">
+                    <div id="foodAlertIcon" class="p-2 rounded-lg bg-amber-100 text-amber-700 shrink-0">
+                        <i class="ph ph-fork-knife text-lg"></i>
+                    </div>
+                    <div class="text-xs">
+                        <h3 id="foodAlertTitle" class="font-bold text-amber-900">Alimentación / Personal</h3>
+                        <p id="foodAlertText" class="text-amber-800 mt-0.5">
+                            Selecciona la categoría [A] para asignar horarios de comida.
+                        </p>
+                    </div>
+                </div>
+
+                <div id="sleepAlertCard" class="p-3 rounded-xl border flex items-start gap-3 bg-amber-50 border-amber-300 transition-all">
+                    <div id="sleepAlertIcon" class="p-2 rounded-lg bg-amber-100 text-amber-700 shrink-0">
+                        <i class="ph ph-moon text-lg"></i>
+                    </div>
+                    <div class="text-xs">
+                        <h3 id="sleepAlertTitle" class="font-bold text-amber-900">Sueño / Descanso</h3>
+                        <p id="sleepAlertText" class="text-amber-800 mt-0.5">
+                            Selecciona la categoría [S] para registrar tus horas de sueño.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RESUMEN DE HORAS -->
+            <section class="mb-5 bg-slate-100/80 p-3.5 rounded-xl border border-slate-200 no-print">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                     <h3 class="text-xs font-black uppercase tracking-wider text-unam-blue flex items-center gap-1.5">
                         <i class="ph ph-chart-pie-slice text-base text-unam-gold"></i>
-                        Balance Semanal del Tiempo (Total: 168 horas)
+                        Métricas Semanales (Rango 04:00 h a 23:00 h - Total: 140 horas)
                     </h3>
-                    <span id="viabilityBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-200 text-slate-700">
-                        Cargando diagnóstico...
-                    </span>
                 </div>
 
                 <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2 text-center text-xs">
@@ -209,11 +228,11 @@
                         <span id="hrs-T" class="text-sm font-black text-orange-600">0 h</span>
                     </div>
                     <div class="bg-white p-2 rounded-lg border border-indigo-200 shadow-sm">
-                        <span class="block text-[10px] text-slate-500 font-semibold">Sueño Nocturno</span>
+                        <span class="block text-[10px] text-slate-500 font-semibold">Sueño</span>
                         <span id="hrs-S" class="text-sm font-black text-indigo-600">0 h</span>
                     </div>
                     <div class="bg-white p-2 rounded-lg border border-sky-200 shadow-sm">
-                        <span class="block text-[10px] text-slate-500 font-semibold">Aliment./Personal</span>
+                        <span class="block text-[10px] text-slate-500 font-semibold">Alimentación</span>
                         <span id="hrs-A" class="text-sm font-black text-sky-600">0 h</span>
                     </div>
                     <div class="bg-white p-2 rounded-lg border border-purple-200 shadow-sm">
@@ -226,20 +245,14 @@
                     </div>
                     <div class="bg-slate-200 p-2 rounded-lg border border-slate-300 shadow-sm">
                         <span class="block text-[10px] text-slate-600 font-semibold">Sin Asignar</span>
-                        <span id="hrs-Free" class="text-sm font-black text-slate-700">168 h</span>
+                        <span id="hrs-Free" class="text-sm font-black text-slate-700">140 h</span>
                     </div>
-                </div>
-
-                <!-- Mensaje de sugerencia tutorada -->
-                <div id="viabilityAdvice" class="mt-3 p-2.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-900 border border-blue-200 flex items-center gap-2">
-                    <i class="ph ph-info text-base shrink-0"></i>
-                    <span>Comienza a pintar tu horario hora a hora seleccionando una categoría.</span>
                 </div>
             </section>
 
-            <!-- PALETA DE SELECCIÓN DE ACTIVIDAD (SELECTOR DE PINTURA) -->
+            <!-- PALETA DE SELECCIÓN DE ACTIVIDAD -->
             <div class="no-print bg-slate-50 p-3 rounded-xl mb-4 border border-slate-200">
-                <span class="block text-xs font-bold text-slate-700 mb-2">1. Haz clic en una categoría para seleccionar con cuál vas a pintar el horario:</span>
+                <span class="block text-xs font-bold text-slate-700 mb-2">1. Haz clic en la categoría deseada y pinta las celdas haciendo clic o arrastrando el ratón:</span>
                 <div class="flex flex-wrap gap-1.5" id="categoryPalette">
                     <button type="button" onclick="selectCategory('C')" data-cat="C" class="cat-btn cat-btn-selected flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm bg-blue-600 text-white">
                         <i class="ph ph-chalkboard-teacher"></i> [C] Clases / Labs
@@ -268,7 +281,7 @@
                 </div>
             </div>
 
-            <!-- LEYENDA ESTÁTICA PARA PDF IMPRESO -->
+            <!-- LEYENDA ESTÁTICA PARA PDF -->
             <div class="hidden print:flex flex-wrap gap-2 mb-2 text-[9px] font-semibold">
                 <span><b>Claves:</b></span>
                 <span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800"><b>C:</b> Clases/Labs</span>
@@ -280,106 +293,90 @@
                 <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800"><b>D:</b> Ocio/Deporte</span>
             </div>
 
+            <!-- PARRILLA DE 04:00 H A 23:00 H -->
             <div class="overflow-x-auto rounded-xl border border-slate-300 shadow-sm mb-6">
                 <table class="w-full text-xs text-left border-collapse schedule-table">
                     <thead>
                         <tr class="bg-unam-blue text-white text-center font-bold">
-                            <th class="p-1.5 border border-slate-700 w-16 bg-unam-darkBlue">Hora</th>
-                            <th class="p-1.5 border border-slate-700">Lunes</th>
-                            <th class="p-1.5 border border-slate-700">Martes</th>
-                            <th class="p-1.5 border border-slate-700">Miércoles</th>
-                            <th class="p-1.5 border border-slate-700">Jueves</th>
-                            <th class="p-1.5 border border-slate-700">Viernes</th>
-                            <th class="p-1.5 border border-slate-700">Sábado</th>
-                            <th class="p-1.5 border border-slate-700">Domingo</th>
+                            <th class="p-1 border border-slate-700 w-16 bg-unam-darkBlue">Hora</th>
+                            <th class="p-1 border border-slate-700">Lunes</th>
+                            <th class="p-1 border border-slate-700">Martes</th>
+                            <th class="p-1 border border-slate-700">Miércoles</th>
+                            <th class="p-1 border border-slate-700">Jueves</th>
+                            <th class="p-1 border border-slate-700">Viernes</th>
+                            <th class="p-1 border border-slate-700">Sábado</th>
+                            <th class="p-1 border border-slate-700">Domingo</th>
                         </tr>
                     </thead>
                     <tbody id="scheduleBody">
-                        <!-- Generado dinámicamente mediante JS (24 Horas x 7 Días) -->
+                        <!-- Generado dinámicamente mediante JS (04:00 a 23:00 h) -->
                     </tbody>
                 </table>
             </div>
 
-            <!-- SECCIONES B, C, D DE LA GUÍA TUTORIAL -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <!-- SECCIONES B, C, D RESTAURADAS DE LA GUÍA TUTORIAL -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2 border-t border-slate-200">
                 
-                <!-- SECCIÓN B: CHECKLIST DE VERIFICACIÓN -->
-                <div class="bg-amber-50/60 p-4 rounded-xl border border-amber-200">
+                <!-- SECCIÓN B: CHECKLIST DE VERIFICACIÓN REALISTA -->
+                <div class="bg-amber-50/70 p-4 rounded-xl border border-amber-200">
                     <h3 class="text-xs font-black text-unam-blue uppercase tracking-wider mb-2 flex items-center gap-1.5">
                         <span class="w-5 h-5 rounded-full bg-unam-blue text-white text-[10px] flex items-center justify-center font-bold">B</span>
                         Verificación Realista
                     </h3>
-                    <p class="text-[11px] text-slate-600 mb-2">Marca si tu horario cumple lo siguiente:</p>
+                    <p class="text-[11px] text-slate-600 mb-2">Marca las condiciones para evaluar si tu plan es viable:</p>
                     <div class="space-y-1.5 text-xs">
-                        <label class="flex items-center gap-2 p-1.5 bg-white rounded border border-slate-200 cursor-pointer">
+                        <label class="flex items-center gap-2 p-1.5 bg-white rounded border border-slate-200 cursor-pointer hover:bg-amber-100/50">
                             <input type="checkbox" id="checkTraslado" class="w-3.5 h-3.5 text-unam-blue rounded border-slate-300">
                             <span class="text-slate-800 text-[11px]">Traslados reales incluidos</span>
                         </label>
-                        <label class="flex items-center gap-2 p-1.5 bg-white rounded border border-slate-200 cursor-pointer">
+                        <label class="flex items-center gap-2 p-1.5 bg-white rounded border border-slate-200 cursor-pointer hover:bg-amber-100/50">
                             <input type="checkbox" id="checkDescanso" class="w-3.5 h-3.5 text-unam-blue rounded border-slate-300">
-                            <span class="text-slate-800 text-[11px]">Al menos 6-8h de sueño diario</span>
+                            <span class="text-slate-800 text-[11px]">Horarios fijos para comer y dormir</span>
                         </label>
-                        <label class="flex items-center gap-2 p-1.5 bg-white rounded border border-slate-200 cursor-pointer">
+                        <label class="flex items-center gap-2 p-1.5 bg-white rounded border border-slate-200 cursor-pointer hover:bg-amber-100/50">
                             <input type="checkbox" id="checkEstudio" class="w-3.5 h-3.5 text-unam-blue rounded border-slate-300">
-                            <span class="text-slate-800 text-[11px]">Estudio activo (no solo tareas)</span>
+                            <span class="text-slate-800 text-[11px]">Estudio activo programado</span>
                         </label>
-                        <label class="flex items-center gap-2 p-1.5 bg-white rounded border border-slate-200 cursor-pointer">
+                        <label class="flex items-center gap-2 p-1.5 bg-white rounded border border-slate-200 cursor-pointer hover:bg-amber-100/50">
                             <input type="checkbox" id="checkRealista" class="w-3.5 h-3.5 text-unam-blue rounded border-slate-300">
-                            <span class="text-slate-800 text-[11px]">Es sostenible esta semana</span>
+                            <span class="text-slate-800 text-[11px]">Plan sostenible para todo el semestre</span>
                         </label>
                     </div>
                 </div>
 
                 <!-- SECCIÓN C: BLOQUE INTOCABLE -->
-                <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-200">
+                <div class="bg-blue-50/70 p-4 rounded-xl border border-blue-200">
                     <h3 class="text-xs font-black text-unam-blue uppercase tracking-wider mb-2 flex items-center gap-1.5">
                         <span class="w-5 h-5 rounded-full bg-unam-blue text-white text-[10px] flex items-center justify-center font-bold">C</span>
                         Mi Bloque Intocable
                     </h3>
                     <div class="space-y-2">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-700 mb-0.5">Asignatura más compleja este semestre:</label>
+                            <label class="block text-[10px] font-bold text-slate-700 mb-0.5">Asignatura con mayor grado de dificultad:</label>
                             <input type="text" id="hardSubject" placeholder="Ej. Cálculo Diferencial / Álgebra" 
                                    class="w-full bg-white px-2 py-1 text-xs rounded border border-slate-300 focus:ring-1 focus:ring-unam-blue outline-none">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-700 mb-0.5">Día y horario intocable de estudio exclusivo:</label>
-                            <input type="text" id="untouchableBlock" placeholder="Ej. Mar y Jue 16:00 a 18:00 h" 
+                            <label class="block text-[10px] font-bold text-slate-700 mb-0.5">Día y horario intocable asignado exclusivamente a esta materia:</label>
+                            <input type="text" id="untouchableBlock" placeholder="Ej. Martes y Jueves de 16:00 h a 18:00 h" 
                                    class="w-full bg-white px-2 py-1 text-xs rounded border border-slate-300 focus:ring-1 focus:ring-unam-blue outline-none">
                         </div>
                     </div>
                 </div>
 
-                <!-- SECCIÓN D: CAMBIO CONCRETO -->
-                <div class="bg-emerald-50/60 p-4 rounded-xl border border-emerald-200">
+                <!-- SECCIÓN D: UN CAMBIO CONCRETO -->
+                <div class="bg-emerald-50/70 p-4 rounded-xl border border-emerald-200">
                     <h3 class="text-xs font-black text-unam-blue uppercase tracking-wider mb-2 flex items-center gap-1.5">
                         <span class="w-5 h-5 rounded-full bg-unam-blue text-white text-[10px] flex items-center justify-center font-bold">D</span>
                         Un Cambio Concreto
                     </h3>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-700 mb-1">Ajuste específico que haré esta semana para mejorar:</label>
-                        <textarea id="concreteChange" rows="3" placeholder="Ej. Dormir a las 23:00 h en lugar de la 1:00 am y usar los trayectos en Pumabús para lecturas breves..." 
+                        <label class="block text-[10px] font-bold text-slate-700 mb-1">Ajuste específico que aplicaré esta semana para optimizar mi tiempo:</label>
+                        <textarea id="concreteChange" rows="3" placeholder="Ej. Dormir a las 23:00 h en lugar de la 1:00 am y repasar lecturas breves durante los trayectos en transporte..." 
                                   class="w-full bg-white p-2 text-xs rounded border border-slate-300 focus:ring-1 focus:ring-unam-blue outline-none resize-none"></textarea>
                     </div>
                 </div>
 
-            </div>
-
-            <div class="pt-6 border-t border-slate-300 mt-6 text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div>
-                    <p class="font-bold text-slate-800">Programa Institucional de Tutoría - FI UNAM</p>
-                    <p class="text-[11px]">Formato válido para integración en la Bitácora de Tutoría.</p>
-                </div>
-                <div class="flex gap-8 text-center pt-2 sm:pt-0">
-                    <div>
-                        <div class="w-36 border-b border-slate-400 mb-1"></div>
-                        <p class="text-[10px] font-semibold text-slate-600">Firma del Alumno/a</p>
-                    </div>
-                    <div>
-                        <div class="w-36 border-b border-slate-400 mb-1"></div>
-                        <p class="text-[10px] font-semibold text-slate-600">Firma del Tutor/a</p>
-                    </div>
-                </div>
             </div>
 
         </div>
@@ -387,32 +384,29 @@
     </main>
 
     <script>
-        // Generar 24 horas (00:00 a 23:00 h)
-        const startHour = 4;
-        const endHour = 23;
-        const totalHoursCount = endHour - startHour + 1; // 20 horas
+        // Rango acotado: 04:00 AM a 23:00 PM (20 horas por día)
+        const hours = Array.from({length: 20}, (_, i) => {
+            const h = (i + 4) < 10 ? `0${i + 4}` : `${i + 4}`;
+            return `${h}:00`;
+        });
+
         const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-    
-        let selectedCategory = 'C'; // Por defecto: Clases [C]
-        let isMouseDown = false;   // Soporte para pintar arrastrando el mouse
+
+        let selectedCategory = 'C';
+        let isMouseDown = false;
 
         window.onload = function() {
-            // Establecer fecha por defecto
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('sessionDate').value = today;
 
-            // Renderizar la matriz de 24h x 7 días
             renderScheduleGrid();
 
-            // Detectar fin de arrastre del mouse
             document.addEventListener('mouseup', () => { isMouseDown = false; });
 
-            // Cargar datos del almacenamiento local si existen
             loadSavedData();
             calculateMetrics();
         };
 
-        // Seleccionar categoría de la paleta
         function selectCategory(cat) {
             selectedCategory = cat;
             const buttons = document.querySelectorAll('.cat-btn');
@@ -427,7 +421,6 @@
             });
         }
 
-        // Renderizar cuadrícula hora a hora
         function renderScheduleGrid() {
             const tbody = document.getElementById('scheduleBody');
             tbody.innerHTML = '';
@@ -435,20 +428,17 @@
             hours.forEach((hourStr, rowIndex) => {
                 const tr = document.createElement('tr');
 
-                // Columna de hora
                 const tdTime = document.createElement('td');
-                tdTime.className = 'p-1 border border-slate-300 font-bold bg-slate-100 text-slate-700 text-center text-[11px] whitespace-nowrap';
+                tdTime.className = 'p-1 border border-slate-300 font-bold bg-slate-100 text-slate-700 text-center text-[10px] whitespace-nowrap';
                 tdTime.innerText = hourStr;
                 tr.appendChild(tdTime);
 
-                // Columnas por día
                 days.forEach((_, colIndex) => {
                     const td = document.createElement('td');
-                    td.className = 'p-0.5 border border-slate-300 align-top cursor-pointer relative h-7 transition-colors hover:border-slate-500';
+                    td.className = 'p-0.5 border border-slate-300 align-top cursor-pointer relative h-6 transition-colors hover:border-slate-500';
                     td.dataset.row = rowIndex;
                     td.dataset.col = colIndex;
 
-                    // Eventos de clic y arrastre
                     td.onmousedown = function(e) {
                         if (e.target.tagName.toLowerCase() === 'textarea') return;
                         isMouseDown = true;
@@ -461,9 +451,8 @@
                         }
                     };
 
-                    // Textarea interno opcional
                     const textarea = document.createElement('textarea');
-                    textarea.className = 'w-full h-full bg-transparent resize-none border-none outline-none text-[9px] font-medium p-0 leading-tight';
+                    textarea.className = 'w-full h-full bg-transparent resize-none border-none outline-none text-[8.5px] font-medium p-0 leading-tight';
                     textarea.placeholder = '';
                     textarea.onchange = () => { saveData(); calculateMetrics(); };
 
@@ -475,7 +464,6 @@
             });
         }
 
-        // Aplicar categoría visual a la celda
         function applyCategoryToCell(cell, cat) {
             cell.classList.remove('cat-C', 'cat-E', 'cat-T', 'cat-S', 'cat-A', 'cat-W', 'cat-D');
             cell.dataset.cat = cat;
@@ -499,7 +487,6 @@
                 }
             });
 
-            // Actualizar contadores en interfaz
             let totalAssigned = 0;
             for (const key in counts) {
                 const el = document.getElementById(`hrs-${key}`);
@@ -507,39 +494,41 @@
                 totalAssigned += counts[key];
             }
 
-            const freeHrs = 168 - totalAssigned;
+            // Total disponible en el rango de 20 horas/día = 140 horas semanales
+            const freeHrs = 140 - totalAssigned;
             document.getElementById('hrs-Free').innerText = `${freeHrs} h`;
 
-            // Diagnóstico de viabilidad de la tutoría
-            const adviceEl = document.getElementById('viabilityAdvice');
-            const badgeEl = document.getElementById('viabilityBadge');
+            // Alerta de Alimentación
+            const foodCard = document.getElementById('foodAlertCard');
+            const foodTitle = document.getElementById('foodAlertTitle');
+            const foodText = document.getElementById('foodAlertText');
 
-            const sleepDailyAvg = (counts.S / 7).toFixed(1);
-
-            if (totalAssigned === 0) {
-                badgeEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-200 text-slate-700';
-                badgeEl.innerText = 'Sin datos';
-                adviceEl.className = 'mt-3 p-2.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-900 border border-blue-200 flex items-center gap-2';
-                adviceEl.innerHTML = `<i class="ph ph-info text-base shrink-0"></i><span>Selecciona una categoría y pinta tus actividades de la semana hora a hora.</span>`;
-            } else if (counts.S < 42) { // Menos de 6 horas diarias de sueño promedio
-                badgeEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300';
-                badgeEl.innerText = 'Riesgo de Agotamiento';
-                adviceEl.className = 'mt-3 p-2.5 rounded-lg text-xs font-medium bg-rose-50 text-rose-900 border border-rose-200 flex items-center gap-2';
-                adviceEl.innerHTML = `<i class="ph ph-warning-circle text-base text-rose-600 shrink-0"></i><span><b>Atención:</b> Registras un promedio de ${sleepDailyAvg}h de sueño al día. La recomendación en la Facultad de Ingeniería para un rendimiento sostenible es de al menos 6 a 8 horas diarias.</span>`;
-            } else if (counts.C > 0 && counts.E < Math.round(counts.C * 0.5)) {
-                badgeEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300';
-                badgeEl.innerText = 'Estudio Autónomo Bajo';
-                adviceEl.className = 'mt-3 p-2.5 rounded-lg text-xs font-medium bg-amber-50 text-amber-900 border border-amber-200 flex items-center gap-2';
-                adviceEl.innerHTML = `<i class="ph ph-warning text-base text-amber-600 shrink-0"></i><span><b>Sugerencia Tutorial:</b> Tienes ${counts.C}h de clase pero solo ${counts.E}h de estudio. Se aconseja destinar mínimo 1h de estudio por cada 1h de clase presencial.</span>`;
+            if (counts.A < 14) {
+                foodCard.className = "p-3 rounded-xl border flex items-start gap-3 bg-amber-50 border-amber-300 transition-all";
+                foodTitle.innerText = `Atención: Horarios de Alimentación (${counts.A} de 14h min/semana)`;
+                foodText.innerText = `Faltan registrar bloques de comida. Se recomiendan mínimo 2h diarias (14h/semana) para desayunar, comer y cenar.`;
             } else {
-                badgeEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
-                badgeEl.innerText = 'Horario Equilibrado';
-                adviceEl.className = 'mt-3 p-2.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-900 border border-emerald-200 flex items-center gap-2';
-                adviceEl.innerHTML = `<i class="ph ph-check-circle text-base text-emerald-600 shrink-0"></i><span><b>¡Buen balance!</b> Tu distribución semanal de tiempo luce equilibrada y viable para mantener tu rendimiento académico.</span>`;
+                foodCard.className = "p-3 rounded-xl border flex items-start gap-3 bg-emerald-50 border-emerald-300 transition-all";
+                foodTitle.innerText = `Adecuado: Alimentación (${counts.A} hrs/semana)`;
+                foodText.innerText = `Tienes asegurado tiempo suficiente para nutrirte adecuadamente.`;
+            }
+
+            // Alerta de Sueño
+            const sleepCard = document.getElementById('sleepAlertCard');
+            const sleepTitle = document.getElementById('sleepAlertTitle');
+            const sleepText = document.getElementById('sleepAlertText');
+
+            if (counts.S < 42) {
+                sleepCard.className = "p-3 rounded-xl border flex items-start gap-3 bg-rose-50 border-rose-300 transition-all";
+                sleepTitle.innerText = `Aviso: Horas de Sueño Registradas (${counts.S} hrs/semana)`;
+                sleepText.innerText = `Asegúrate de mantener al menos 6h a 8h diarias de descanso nocturno para evitar la fatiga mental.`;
+            } else {
+                sleepCard.className = "p-3 rounded-xl border flex items-start gap-3 bg-emerald-50 border-emerald-300 transition-all";
+                sleepTitle.innerText = `Adecuado: Sueño y Descanso (${counts.S} hrs/semana)`;
+                sleepText.innerText = `Buen balance de descanso diario para apoyar el aprendizaje en ingeniería.`;
             }
         }
 
-        // Guardar progreso en LocalStorage
         function saveData() {
             const gridData = [];
             const cells = document.querySelectorAll('#scheduleBody td[data-row]');
@@ -574,7 +563,6 @@
             localStorage.setItem('tutoria_fi_horario_24h', JSON.stringify(data));
         }
 
-        // Cargar datos
         function loadSavedData() {
             const saved = localStorage.getItem('tutoria_fi_horario_24h');
             if (!saved) return;
@@ -610,7 +598,6 @@
             }
         }
 
-        // Event listeners para autoguardado
         const inputIds = ['studentName', 'accountNum', 'studentCareer', 'tutorName', 'sessionDate', 'hardSubject', 'untouchableBlock', 'concreteChange', 'checkTraslado', 'checkDescanso', 'checkEstudio', 'checkRealista'];
         inputIds.forEach(id => {
             const el = document.getElementById(id);
@@ -620,9 +607,8 @@
             }
         });
 
-        // Limpiar formulario
         function resetForm() {
-            if (confirm("¿Deseas reiniciar todo el horario y borrar los datos guardados?")) {
+            if (confirm("¿Deseas reiniciar el horario y borrar todos los datos guardados?")) {
                 localStorage.removeItem('tutoria_fi_horario_24h');
                 document.querySelectorAll('input[type="text"], textarea').forEach(i => i.value = '');
                 document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
@@ -633,6 +619,5 @@
     </script>
 </body>
 </html>
-   
 
 
