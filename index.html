@@ -587,3 +587,32 @@
         }
 
         // Event listeners para autoguardado de campos de texto
+        const inputsToSave = ['studentName', 'studentGroup', 'sessionDate', 'hardSubject', 'untouchableBlock', 'concreteChange', 'checkTraslado', 'checkDescanso', 'checkEstudio', 'checkRealista'];
+        inputsToSave.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', saveData);
+                el.addEventListener('change', saveData);
+            }
+        });
+
+        // Reiniciar formulario
+        function resetForm() {
+            if (confirm("¿Estás seguro de que deseas limpiar todo el horario y respuestas?")) {
+                localStorage.removeItem('tutoria_sesion3_data');
+                document.getElementById('studentName').value = '';
+                document.getElementById('studentGroup').value = '';
+                document.getElementById('hardSubject').value = '';
+                document.getElementById('untouchableBlock').value = '';
+                document.getElementById('concreteChange').value = '';
+                
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                
+                renderScheduleGrid();
+            }
+        }
+    </script>
+</body>
+</html>
+
+
