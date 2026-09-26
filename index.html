@@ -3,586 +3,957 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Horario Semanal Realista - Sesión 3 | Tutoría FI UNAM</title>
+    <title>PlanificaTuSemana - Auditoría y Planificación Realista</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        unam: {
-                            gold: '#C29B38',
-                            navy: '#0A2240',
-                            blue: '#133863',
-                            lightGold: '#F4E8C1'
-                        }
-                    },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            900: '#14532d',
+                        }
                     }
                 }
             }
         }
     </script>
     <style>
-        .schedule-cell {
-            user-select: none;
-            transition: background-color 0.15s ease, border-color 0.15s ease;
-            position: relative;
-            height: 28px;
+        body { font-family: 'Inter', sans-serif; }
+        .grid-time-slot {
+            min-height: 44px;
+            transition: all 0.15s ease-in-out;
         }
-        
-        .schedule-cell input {
-            background: transparent;
-            width: 100%;
-            height: 100%;
-            text-align: center !important;
-            font-weight: 700;
-            font-size: 0.75rem;
-            outline: none;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
+        .grid-time-slot:hover {
+            filter: brightness(0.96);
         }
-
-        /* Solid vivid category colors */
-        .cat-clases { background-color: #2563eb !important; color: #ffffff !important; }
-        .cat-estudio { background-color: #059669 !important; color: #ffffff !important; }
-        .cat-traslado { background-color: #d97706 !important; color: #ffffff !important; }
-        .cat-sueño { background-color: #4f46e5 !important; color: #ffffff !important; }
-        .cat-comida { background-color: #f43f5e !important; color: #ffffff !important; }
-        .cat-trabajo { background-color: #9333ea !important; color: #ffffff !important; }
-        .cat-ocio { background-color: #06b6d4 !important; color: #ffffff !important; }
-        .cat-libre { background-color: #ffffff !important; color: #334155 !important; }
-
+        /* Custom scrollbar for weekly view */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
         @media print {
-            @page {
-                size: letter portrait;
-                margin: 6mm;
-            }
-            body {
-                background: white !important;
-                color: black !important;
-                font-size: 8pt !important;
-            }
-            .no-print {
-                display: none !important;
-            }
-            .print-only {
-                display: block !important;
-            }
-            .shadow-lg, .shadow-md, .shadow-sm, .shadow {
-                box-shadow: none !important;
-            }
-            .border-2, .border {
-                border-color: #94a3b8 !important;
-            }
-            .print-compact-table td, .print-compact-table th {
-                padding: 1px 2px !important;
-                font-size: 7pt !important;
-                height: 20px !important;
-            }
-            .print-compact-table input {
-                font-size: 7pt !important;
-            }
-            .print-header {
-                border-bottom: 2px solid #0A2240;
-                padding-bottom: 4px;
-                margin-bottom: 8px;
-            }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            .print-break-before { page-break-before: always; }
+            body { background: white; color: black; }
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col justify-between">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
 
-    <!-- Header Principal -->
-    <header class="bg-unam-navy text-white shadow-md print-header">
-        <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-3">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-unam-gold rounded-full flex items-center justify-center font-bold text-unam-navy text-lg shadow">
-                    FI
+    <!-- Top Navigation Bar -->
+    <header class="bg-indigo-900 text-white shadow-lg sticky top-0 z-30 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 p-2.5 rounded-xl shadow-inner">
+                    <i class="fa-solid fa-calendar-check text-xl text-white"></i>
                 </div>
                 <div>
-                    <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white">Programa Institucional de Tutoría</h1>
-                    <p class="text-xs text-unam-gold font-medium">Facultad de Ingeniería - UNAM | Sesión 3: Horario Semanal Realista</p>
+                    <h1 class="text-lg font-bold tracking-tight leading-none">PlanificaTuSemana</h1>
+                    <p class="text-xs text-indigo-200 mt-0.5">Tutoría Académica & Presupuesto de Tiempo Realista</p>
                 </div>
             </div>
-            <div class="no-print flex items-center gap-2">
-                <button onclick="clearSchedule()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-sm">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    Limpiar Horario
+
+            <div class="flex items-center space-x-3">
+                <div class="hidden md:flex items-center bg-indigo-950/60 px-3 py-1.5 rounded-lg border border-indigo-700/50 text-xs">
+                    <span class="text-indigo-300 mr-2"><i class="fa-solid fa-user-graduate"></i> Estudiante:</span>
+                    <input type="text" id="studentName" placeholder="Tu Nombre Aquí" class="bg-transparent border-b border-indigo-500 focus:outline-none focus:border-white text-white font-medium w-36 placeholder-indigo-400/70 text-xs">
+                </div>
+                <button onclick="applyPresetWizard()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-lg transition shadow flex items-center gap-1.5">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Asistente Rápido</span>
                 </button>
-                <button onclick="window.print()" class="px-4 py-1.5 bg-unam-gold hover:bg-amber-500 text-unam-navy font-bold rounded-lg text-xs transition flex items-center gap-1.5 shadow">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                    Imprimir / PDF
+                <button onclick="exportSummaryPDF()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-lg transition shadow flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-export"></i> <span>Entregar a Tutor</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Contenido Principal -->
-    <main class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 flex-grow w-full">
+    <!-- Live Hours Budget & Diagnostic Bar -->
+    <section class="bg-white border-b border-slate-200 shadow-sm no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                <!-- Hours Meter -->
+                <div class="md:col-span-8">
+                    <div class="flex justify-between items-center text-xs font-semibold text-slate-600 mb-1.5">
+                        <span class="flex items-center gap-1.5">
+                            <i class="fa-solid fa-clock text-indigo-600"></i> Presupuesto Semanal de Tiempo: 
+                            <strong id="allocatedHoursText" class="text-indigo-900 text-sm font-bold">0 / 168 hrs</strong>
+                        </span>
+                        <span id="freeHoursText" class="text-slate-500">168 hrs sin asignar</span>
+                    </div>
+                    <!-- Multi-color Progress Bar -->
+                    <div class="w-full bg-slate-200 rounded-full h-3.5 flex overflow-hidden shadow-inner p-0.5" id="progressBarContainer">
+                        <div id="barSleep" class="bg-indigo-500 h-full transition-all duration-300" style="width: 0%" title="Sueño"></div>
+                        <div id="barClasses" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%" title="Clases"></div>
+                        <div id="barStudy" class="bg-amber-500 h-full transition-all duration-300" style="width: 0%" title="Estudio"></div>
+                        <div id="barPersonal" class="bg-rose-500 h-full transition-all duration-300" style="width: 0%" title="Personal/Rutinas"></div>
+                        <div id="barLeisure" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%" title="Ocio/Social"></div>
+                        <div id="barSport" class="bg-cyan-500 h-full transition-all duration-300" style="width: 0%" title="Deporte"></div>
+                    </div>
+                </div>
 
-        <!-- Formulario Datos del Alumno -->
-        <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-3 mb-4">
-            <h2 class="text-xs font-bold text-unam-navy uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-unam-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                Datos Generales del Tutorado
-            </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <!-- Reality Status Badge -->
+                <div class="md:col-span-4 flex items-center justify-start md:justify-end">
+                    <div id="realityBadge" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 shadow-sm w-full md:w-auto justify-center">
+                        <i class="fa-solid fa-circle-info text-indigo-500 text-sm"></i>
+                        <span id="realityBadgeText">Empieza a añadir tus bloques</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+        <!-- Quick Fill Tool Banner -->
+        <div class="mb-6 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm no-print">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
-                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Nombre Completo del Alumno(a):</label>
-                    <input type="text" placeholder="Ingresa tu nombre completo" class="w-full text-xs p-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-unam-navy outline-none font-medium text-slate-800">
+                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-bolt text-amber-500"></i> Bloques Básicos Innegociables
+                    </h2>
+                    <p class="text-xs text-slate-500">Haz clic para precargar las actividades esenciales que la mayoría olvida calcular.</p>
                 </div>
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Carrera:</label>
-                    <input type="text" placeholder="Ej. Ingeniería en Computación" class="w-full text-xs p-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-unam-navy outline-none font-medium text-slate-800">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Periodo / Semana:</label>
-                    <input type="text" value="Semana del 21 al 25 de septiembre de 2026" class="w-full text-xs p-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-unam-navy outline-none font-semibold text-slate-700 bg-slate-50">
-                </div>
-            </div>
-            <div class="mt-2 text-xs font-semibold text-slate-600 flex items-center gap-1">
-                <span>Nombre de la Tutora:</span>
-                <span class="text-unam-navy font-bold">M.I. Nayelli Manzanarez Gómez</span>
-            </div>
-        </section>
-
-        <!-- Indicadores de Alertas de Salud -->
-        <section class="no-print mb-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div id="foodAlertCard" class="p-3 rounded-xl border flex items-start gap-2.5 bg-amber-50 border-amber-300 transition-all">
-                <div id="foodAlertIcon" class="p-1.5 rounded-lg bg-amber-100 text-amber-700 shrink-0 mt-0.5">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                </div>
-                <div class="text-xs">
-                    <h3 id="foodAlertTitle" class="font-bold text-amber-900">Alimentación: 0 hrs asignadas</h3>
-                    <p id="foodAlertText" class="text-amber-800 text-[11px] mt-0.5">
-                        No has registrado tiempo para comidas. Se recomienda asignar al menos 2 hrs/día (14 hrs/semana) para desayunar, comer y cenar.
-                    </p>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="addPreset('SUEÑO')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/80 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-moon text-indigo-600"></i> + Dormir 8h/día
+                    </button>
+                    <button onclick="addPreset('COMIDA')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/80 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-utensils text-rose-600"></i> + Comidas y Aseo (2h/día)
+                    </button>
+                    <button onclick="addPreset('TRASLADO')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-bus text-slate-600"></i> + Traslados (1.5h/día)
+                    </button>
+                    <button onclick="addPreset('CLASES_STD')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200/80 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-graduation-cap text-blue-600"></i> + Clases L-V (7:00-14:00)
+                    </button>
+                    <button onclick="resetWeeklyGrid()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600 border border-slate-200 transition flex items-center gap-1.5 ml-auto">
+                        <i class="fa-solid fa-trash-can"></i> Limpiar Todo
+                    </button>
                 </div>
             </div>
+        </div>
 
-            <div id="sleepAlertCard" class="p-3 rounded-xl border flex items-start gap-2.5 bg-amber-50 border-amber-300 transition-all">
-                <div id="sleepAlertIcon" class="p-1.5 rounded-lg bg-amber-100 text-amber-700 shrink-0 mt-0.5">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                </div>
-                <div class="text-xs">
-                    <h3 id="sleepAlertTitle" class="font-bold text-amber-900">Sueño / Descanso: 0 hrs asignadas</h3>
-                    <p id="sleepAlertText" class="text-amber-800 text-[11px] mt-0.5">
-                        No has registrado tiempo de descanso. Se sugieren entre 6 y 8 hrs diarias de sueño para mantener un buen rendimiento.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Paleta de Categorías con Opción de Borrador -->
-        <section class="no-print bg-white rounded-xl shadow-sm border border-slate-200 p-3 mb-4">
-            <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                1. Selecciona una categoría o borrador y haz clic / arrastra sobre las celdas:
-            </h2>
-            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2" id="categoryPalette">
-                <!-- Botones generados dinámicamente en JS -->
-            </div>
-        </section>
-
-        <!-- Balance Semanal -->
-        <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-3 mb-4">
-            <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                Balance Semanal de Tiempo (Horario 04:00 h a 23:00 h: Total 140 Horas)
-            </h2>
-            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 text-center text-xs" id="summaryContainer">
-                <!-- Resumen generado por JS -->
-            </div>
-        </section>
-
-        <!-- Parrilla del Horario -->
-        <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
-            <div class="p-2.5 bg-slate-800 text-white flex justify-between items-center text-xs">
-                <span class="font-bold flex items-center gap-1.5">
-                    <svg class="w-4 h-4 text-unam-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Parrilla Semanal (04:00 h a 23:00 h)
-                </span>
-                <span class="text-slate-300 text-[11px] no-print">Sugerencia: Haz clic o arrastra para pintar. Haz clic en el texto para editarlo.</span>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-center text-xs border-collapse print-compact-table" id="scheduleTable">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-300">
-                            <th class="py-2 px-1 border-r border-slate-300 w-20">Hora</th>
-                            <th class="py-2 px-1 border-r border-slate-200">Lunes</th>
-                            <th class="py-2 px-1 border-r border-slate-200">Martes</th>
-                            <th class="py-2 px-1 border-r border-slate-200">Miércoles</th>
-                            <th class="py-2 px-1 border-r border-slate-200">Jueves</th>
-                            <th class="py-2 px-1 border-r border-slate-200">Viernes</th>
-                            <th class="py-2 px-1 border-r border-slate-200 text-indigo-900 bg-indigo-50/50">Sábado</th>
-                            <th class="py-2 px-1 text-indigo-900 bg-indigo-50/50">Domingo</th>
-                        </tr>
-                    </thead>
-                    <tbody id="scheduleBody">
-                        <!-- Celdas construidas mediante JS -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- SECCIONES B, C y D: Verificación Realista, Bloque Intocable y Cambio Concreto -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- B. Verificación Realista -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between">
-                <div>
-                    <h3 class="text-xs font-bold text-unam-navy uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                        <span class="w-5 h-5 bg-unam-navy text-white rounded-full flex items-center justify-center text-[10px]">B</span>
-                        Verificación Realista
+            <!-- Left Side: Interactive 7-Day Grid (8 Cols) -->
+            <div class="lg:col-span-8 space-y-4">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center flex-wrap gap-2">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-calendar-week text-indigo-600"></i> Horario Semanal Activo
+                            </h3>
+                            <p class="text-xs text-slate-500">Toca cualquier celda para añadir o modificar una actividad.</p>
+                        </div>
+                        <!-- Color Legend -->
+                        <div class="flex flex-wrap gap-2 text-[11px] font-medium">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-100 text-indigo-800"><span class="w-2 h-2 rounded-full bg-indigo-600"></span> Sueño</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-100 text-blue-800"><span class="w-2 h-2 rounded-full bg-blue-600"></span> Clases</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-100 text-amber-800"><span class="w-2 h-2 rounded-full bg-amber-600"></span> Estudio</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-100 text-rose-800"><span class="w-2 h-2 rounded-full bg-rose-600"></span> Personal</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-100 text-emerald-800"><span class="w-2 h-2 rounded-full bg-emerald-600"></span> Ocio</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-cyan-100 text-cyan-800"><span class="w-2 h-2 rounded-full bg-cyan-600"></span> Deporte</span>
+                        </div>
+                    </div>
+
+                    <!-- Calendar Grid Wrapper -->
+                    <div class="overflow-x-auto custom-scrollbar max-h-[600px] overflow-y-auto">
+                        <table class="w-full border-collapse text-left min-w-[700px]">
+                            <thead class="bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider sticky top-0 z-20 shadow-sm">
+                                <tr>
+                                    <th class="p-2.5 text-center border-b border-r border-slate-200 w-16 bg-slate-100">Hora</th>
+                                    <th class="p-2.5 text-center border-b border-r border-slate-200 w-1/7">Lun</th>
+                                    <th class="p-2.5 text-center border-b border-r border-slate-200 w-1/7">Mar</th>
+                                    <th class="p-2.5 text-center border-b border-r border-slate-200 w-1/7">Mié</th>
+                                    <th class="p-2.5 text-center border-b border-r border-slate-200 w-1/7">Jue</th>
+                                    <th class="p-2.5 text-center border-b border-r border-slate-200 w-1/7">Vie</th>
+                                    <th class="p-2.5 text-center border-b border-r border-slate-200 w-1/7 bg-amber-50/50 text-amber-900">Sáb</th>
+                                    <th class="p-2.5 text-center border-b border-slate-200 w-1/7 bg-amber-50/50 text-amber-900">Dom</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scheduleTableBody" class="divide-y divide-slate-200 text-xs">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Analytics, Diagnostics & Reflection (4 Cols) -->
+            <div class="lg:col-span-4 space-y-6">
+                
+                <!-- Chart Card -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center justify-between">
+                        <span class="flex items-center gap-2"><i class="fa-solid fa-chart-pie text-indigo-600"></i> Distribución de Tiempo</span>
                     </h3>
-                    <p class="text-[11px] text-slate-600 mb-3">Responde con honestidad el siguiente checklist de viabilidad:</p>
-                    
-                    <div class="space-y-2 text-xs">
-                        <label class="flex items-start gap-2 cursor-pointer">
-                            <input type="checkbox" class="mt-0.5 rounded text-unam-navy focus:ring-unam-navy">
-                            <span class="text-slate-700 text-[11px]">¿Consideré el tiempo real de traslados ida y vuelta?</span>
+                    <div class="relative h-52 flex items-center justify-center">
+                        <canvas id="balanceChart"></canvas>
+                    </div>
+                    <div id="chartSummaryList" class="mt-4 space-y-1.5 text-xs">
+                        <!-- Dynamic list of hours -->
+                    </div>
+                </div>
+
+                <!-- Tutor Audit & Feedback Box -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-user-doctor text-indigo-600"></i> Diagnóstico de Tutoría
+                    </h3>
+                    <div id="tutorFeedbackList" class="space-y-2 text-xs">
+                        <!-- Dynamic Smart Alerts -->
+                    </div>
+                </div>
+
+                <!-- Reflection Questions for Tutoring -->
+                <div class="bg-slate-900 text-white p-5 rounded-2xl shadow-md space-y-4">
+                    <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
+                        <i class="fa-solid fa-brain text-amber-400 text-base"></i>
+                        <h3 class="text-sm font-bold">Compromisos y Reflexión</h3>
+                    </div>
+
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-medium text-slate-300 mb-1">1. ¿Cuál es tu materia/reto más pesado esta semana?</label>
+                            <input type="text" id="refChallenge" placeholder="Ej. Examen de Cálculo el jueves" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white focus:outline-none focus:border-indigo-400 placeholder-slate-500">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-300 mb-1">2. ¿Qué imprevisto podría arruinar este plan?</label>
+                            <input type="text" id="refObstacle" placeholder="Ej. Quedarme en redes en la noche, cansancio" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white focus:outline-none focus:border-indigo-400 placeholder-slate-500">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-300 mb-1">3. Tu Plan B para mantenerte realista:</label>
+                            <textarea id="refPlanB" rows="2" placeholder="Ej. Si pierdo 2 horas, recupero solo 1 hora recortando ocio y mantengo mi sueño intacto." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white focus:outline-none focus:border-indigo-400 placeholder-slate-500 resize-none"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- PRINT / EXPORT PAGE SUMMARY (Hidden on web UI, visible only when exporting/printing) -->
+        <div class="print-only hidden p-8 space-y-6">
+            <div class="border-b-2 border-slate-800 pb-4 flex justify-between items-end">
+                <div>
+                    <h1 class="text-2xl font-bold">Informe de Planificación Semanal Realista</h1>
+                    <p class="text-sm text-slate-600">Sesión de Tutoría Académica</p>
+                </div>
+                <div class="text-right text-xs text-slate-500">
+                    <p>Estudiante: <strong id="printStudentName" class="text-slate-800 text-sm">---</strong></p>
+                    <p>Fecha: <span id="printDate">---</span></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 text-xs">
+                <div class="p-4 bg-slate-100 rounded-lg border">
+                    <h4 class="font-bold text-sm mb-2">Resumen de Horas (168h Totales):</h4>
+                    <ul id="printHoursSummary" class="space-y-1"></ul>
+                </div>
+                <div class="p-4 bg-slate-100 rounded-lg border">
+                    <h4 class="font-bold text-sm mb-2">Compromisos de Reflexión:</h4>
+                    <p><strong>Reto de la semana:</strong> <span id="printRef1"></span></p>
+                    <p><strong>Posible obstáculo:</strong> <span id="printRef2"></span></p>
+                    <p><strong>Estrategia / Plan B:</strong> <span id="printRef3"></span></p>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="font-bold text-sm mb-2">Diagnóstico de la Tutoría:</h3>
+                <div id="printDiagnostics" class="text-xs space-y-1 p-3 bg-slate-50 rounded border"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit Activity Modal -->
+    <div id="activityModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-md overflow-hidden transform transition-all">
+            <div class="p-4 bg-indigo-900 text-white flex justify-between items-center">
+                <h3 class="font-bold text-sm flex items-center gap-2" id="modalTitle">
+                    <i class="fa-solid fa-pen-to-square text-indigo-300"></i> Modificar Bloque
+                </h3>
+                <button onclick="closeModal()" class="text-indigo-200 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="p-5 space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Día y Hora seleccionados:</label>
+                    <p id="modalSlotInfo" class="text-indigo-900 font-bold bg-indigo-50 p-2.5 rounded-lg border border-indigo-100"></p>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Categoría de Actividad:</label>
+                    <select id="modalCategory" onchange="updateModalDefaults()" class="w-full p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50 text-xs font-medium">
+                        <option value="SUEÑO">😴 Sueño y Descanso</option>
+                        <option value="CLASES">📚 Clases y Horario Escolar</option>
+                        <option value="ESTUDIO">✍️ Estudio y Tareas en Casa</option>
+                        <option value="PERSONAL">🍔 Comidas, Aseo y Rutina Personal</option>
+                        <option value="OCIO">🎨 Ocio, Amigos y Redes Sociales</option>
+                        <option value="DEPORTE">⚽ Deporte y Salud Física</option>
+                        <option value="VACIO">⚪ Tiempo Libre / Sin Asignar</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Nombre / Detalle (Opcional):</label>
+                    <input type="text" id="modalLabel" placeholder="Ej. Tarea de Física, Dormir, Almuerzo" class="w-full p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-xs">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Aplicar también a otros días:</label>
+                    <div class="flex flex-wrap gap-2 pt-1" id="modalDaysRepeat">
+                        <label class="inline-flex items-center gap-1 bg-slate-100 px-2 py-1 rounded text-slate-700 cursor-pointer">
+                            <input type="checkbox" value="0" class="day-repeat-cb"> Lun
                         </label>
-                        <label class="flex items-start gap-2 cursor-pointer">
-                            <input type="checkbox" class="mt-0.5 rounded text-unam-navy focus:ring-unam-navy">
-                            <span class="text-slate-700 text-[11px]">¿Tengo al menos 2 hrs de estudio por cada hora de clase compleja?</span>
+                        <label class="inline-flex items-center gap-1 bg-slate-100 px-2 py-1 rounded text-slate-700 cursor-pointer">
+                            <input type="checkbox" value="1" class="day-repeat-cb"> Mar
                         </label>
-                        <label class="flex items-start gap-2 cursor-pointer">
-                            <input type="checkbox" class="mt-0.5 rounded text-unam-navy focus:ring-unam-navy">
-                            <span class="text-slate-700 text-[11px]">¿Respeté mis horas de comida y descanso nocturno?</span>
+                        <label class="inline-flex items-center gap-1 bg-slate-100 px-2 py-1 rounded text-slate-700 cursor-pointer">
+                            <input type="checkbox" value="2" class="day-repeat-cb"> Mié
                         </label>
-                        <label class="flex items-start gap-2 cursor-pointer">
-                            <input type="checkbox" class="mt-0.5 rounded text-unam-navy focus:ring-unam-navy">
-                            <span class="text-slate-700 text-[11px]">¿Dejé tiempo amortiguador para imprevistos o retrasos?</span>
+                        <label class="inline-flex items-center gap-1 bg-slate-100 px-2 py-1 rounded text-slate-700 cursor-pointer">
+                            <input type="checkbox" value="3" class="day-repeat-cb"> Jue
+                        </label>
+                        <label class="inline-flex items-center gap-1 bg-slate-100 px-2 py-1 rounded text-slate-700 cursor-pointer">
+                            <input type="checkbox" value="4" class="day-repeat-cb"> Vie
+                        </label>
+                        <label class="inline-flex items-center gap-1 bg-slate-100 px-2 py-1 rounded text-slate-700 cursor-pointer">
+                            <input type="checkbox" value="5" class="day-repeat-cb"> Sáb
+                        </label>
+                        <label class="inline-flex items-center gap-1 bg-slate-100 px-2 py-1 rounded text-slate-700 cursor-pointer">
+                            <input type="checkbox" value="6" class="day-repeat-cb"> Dom
                         </label>
                     </div>
                 </div>
             </div>
 
-            <!-- C. Mi Bloque Intocable -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between">
-                <div>
-                    <h3 class="text-xs font-bold text-unam-navy uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                        <span class="w-5 h-5 bg-unam-navy text-white rounded-full flex items-center justify-center text-[10px]">C</span>
-                        Mi Bloque Intocable
-                    </h3>
-                    <p class="text-[11px] text-slate-600 mb-2">Define la actividad no negociable que mantendrá tu bienestar este semestre:</p>
-                    <textarea rows="3" placeholder="Ejemplo: Hacer ejercicio 1 hr diaria de 7 a 8 am / Dormir a las 11 pm los días de entrega / Convivencia familiar los domingos." class="w-full text-xs p-2 border border-slate-300 rounded focus:ring-1 focus:ring-unam-navy outline-none resize-none text-slate-800"></textarea>
+            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-between gap-2">
+                <button onclick="clearSlotFromModal()" class="px-3 py-2 rounded-lg text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition">
+                    <i class="fa-solid fa-eraser"></i> Borrar
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="closeModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-200 transition">Cancelar</button>
+                    <button onclick="saveSlotModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow transition">Guardar Bloque</button>
                 </div>
             </div>
-
-            <!-- D. Un Cambio Concreto -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between">
-                <div>
-                    <h3 class="text-xs font-bold text-unam-navy uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                        <span class="w-5 h-5 bg-unam-navy text-white rounded-full flex items-center justify-center text-[10px]">D</span>
-                        Un Cambio Concreto
-                    </h3>
-                    <p class="text-[11px] text-slate-600 mb-2">¿Qué ajuste específico harás respecto al semestre anterior?</p>
-                    <textarea rows="3" placeholder="Ejemplo: Dejar de repasar en el transporte / Estudiar 1 hora diaria de Cálculo en lugar de desvelarme un día antes del examen." class="w-full text-xs p-2 border border-slate-300 rounded focus:ring-1 focus:ring-unam-navy outline-none resize-none text-slate-800"></textarea>
-                </div>
-            </div>
-
-        </section>
-
-    </main>
-
-    <!-- Pie de página -->
-    <footer class="bg-slate-900 text-slate-400 text-xs py-3 no-print mt-auto border-t border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 text-center flex flex-col sm:flex-row justify-between items-center gap-2">
-            <p>© UNAM - Facultad de Ingeniería | Coordinación de Tutoría</p>
-            <p class="text-slate-500">Herramienta de Diagnóstico Realista de Gestión del Tiempo</p>
         </div>
-    </footer>
+    </div>
 
-    <!-- Lógica JavaScript -->
+    <!-- Quick Wizard Modal -->
+    <div id="wizardModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg overflow-hidden">
+            <div class="p-4 bg-indigo-900 text-white flex justify-between items-center">
+                <h3 class="font-bold text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> Asistente de Configuración Rápida
+                </h3>
+                <button onclick="closeWizard()" class="text-indigo-200 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-5 space-y-4 text-xs">
+                <p class="text-slate-600">Responde estas breves preguntas para armar un esqueleto realista en segundos:</p>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block font-semibold text-slate-800 mb-1">1. Horas de sueño objetivo por noche:</label>
+                        <select id="wizSleep" class="w-full p-2 rounded-lg border border-slate-300">
+                            <option value="8">8 horas (Recomendado para memoria y aprendizaje)</option>
+                            <option value="7">7 horas (Mínimo saludable)</option>
+                            <option value="6">6 horas (Riesgo de fatiga acumulada)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-800 mb-1">2. Tu horario habitual de clases (Lunes a Viernes):</label>
+                        <select id="wizClasses" class="w-full p-2 rounded-lg border border-slate-300">
+                            <option value="7-14">Matutino (7:00 AM - 2:00 PM)</option>
+                            <option value="8-15">Matutino largo (8:00 AM - 3:00 PM)</option>
+                            <option value="14-20">Vespertino (2:00 PM - 8:00 PM)</option>
+                            <option value="NONE">Sin horario fijo de clases</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-800 mb-1">3. ¿Cuánto tardas en traslados diarios (ida y vuelta)?</label>
+                        <select id="wizCommute" class="w-full p-2 rounded-lg border border-slate-300">
+                            <option value="1">1 hora al día</option>
+                            <option value="2">2 horas al día</option>
+                            <option value="3">3 horas o más al día</option>
+                            <option value="0">Estudio en casa / Vivo muy cerca</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+                <button onclick="closeWizard()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-200">Cancelar</button>
+                <button onclick="executeWizard()" class="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow">Generar Horario Base</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Notification Toast -->
+    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 border border-slate-700 text-xs pointer-events-none">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+        <span id="toastMessage">Acción completada</span>
+    </div>
+
     <script>
-        // Categorías con sus clases de Tailwind y estilos
-        const categories = {
-            clases: {
-                id: 'clases',
-                name: 'Clases / Labs',
-                label: 'Clase / Lab',
-                cssClass: 'cat-clases'
-            },
-            estudio: {
-                id: 'estudio',
-                name: 'Estudio / Tareas',
-                label: 'Estudio',
-                cssClass: 'cat-estudio'
-            },
-            traslado: {
-                id: 'traslado',
-                name: 'Traslado',
-                label: 'Traslado',
-                cssClass: 'cat-traslado'
-            },
-            sueño: {
-                id: 'sueño',
-                name: 'Sueño / Descanso',
-                label: 'Dormir',
-                cssClass: 'cat-sueño'
-            },
-            comida: {
-                id: 'comida',
-                name: 'Alimentación / Personal',
-                label: 'Comer',
-                cssClass: 'cat-comida'
-            },
-            trabajo: {
-                id: 'trabajo',
-                name: 'Trabajo / Familia',
-                label: 'Trabajo',
-                cssClass: 'cat-trabajo'
-            },
-            ocio: {
-                id: 'ocio',
-                name: 'Ocio / Deporte',
-                label: 'Ocio',
-                cssClass: 'cat-ocio'
-            },
-            borrador: {
-                id: 'borrador',
-                name: 'Borrador / Limpiar Celda',
-                label: '',
-                cssClass: 'cat-libre'
-            },
-            libre: {
-                id: 'libre',
-                name: 'Sin Asignar',
-                label: '',
-                cssClass: 'cat-libre'
-            }
+        // Days and Hours Definitions
+        const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+        const SHORT_DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        const START_HOUR = 6; // 6:00 AM
+        const END_HOUR = 23;  // 11:00 PM (18 slots total per day)
+
+        // Category Dictionary with metadata
+        const CATEGORIES = {
+            SUEÑO: { name: 'Sueño y Descanso', color: 'bg-indigo-600 text-white border-indigo-700', hex: '#4f46e5', icon: 'fa-moon' },
+            CLASES: { name: 'Clases / Colegio', color: 'bg-blue-600 text-white border-blue-700', hex: '#2563eb', icon: 'fa-graduation-cap' },
+            ESTUDIO: { name: 'Estudio y Tareas', color: 'bg-amber-500 text-slate-900 border-amber-600 font-semibold', hex: '#f59e0b', icon: 'fa-pen-ruler' },
+            PERSONAL: { name: 'Comidas y Rutina', color: 'bg-rose-500 text-white border-rose-600', hex: '#f43f5e', icon: 'fa-utensils' },
+            OCIO: { name: 'Ocio y Amigos', color: 'bg-emerald-500 text-white border-emerald-600', hex: '#10b981', icon: 'fa-gamepad' },
+            DEPORTE: { name: 'Deporte y Salud', color: 'bg-cyan-500 text-slate-900 border-cyan-600 font-semibold', hex: '#06b6d4', icon: 'fa-person-running' },
+            VACIO: { name: 'Disponible', color: 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-indigo-50/50', hex: '#e2e8f0', icon: 'fa-plus' }
         };
 
-        const hours = [];
-        for (let i = 4; i <= 23; i++) {
-            hours.push(i);
-        }
+        // Application State Matrix [dayIndex][hourIndex]
+        // 7 Days x 18 Hours
+        let gridState = Array(7).fill(null).map(() => Array(END_HOUR - START_HOUR + 1).fill(null));
 
-        const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+        // Active slot selection for modal
+        let selectedDay = 0;
+        let selectedHourIndex = 0;
+        let chartInstance = null;
 
-        // Estado inicial de la cuadrícula: 20 filas x 7 columnas
-        let scheduleData = Array(hours.length).fill(null).map(() => 
-            Array(7).fill(null).map(() => ({ category: 'libre', text: '' }))
-        );
+        window.onload = function() {
+            renderTableGrid();
+            initChart();
+            updateAnalytics();
 
-        let selectedCategory = 'clases';
-        let isMouseDown = false;
-
-        document.addEventListener('DOMContentLoaded', () => {
-            renderPalette();
-            renderTable();
-            updateSummary();
-
-            window.addEventListener('mouseup', () => {
-                isMouseDown = false;
-            });
-        });
-
-        function renderPalette() {
-            const container = document.getElementById('categoryPalette');
-            container.innerHTML = '';
-
-            Object.keys(categories).forEach(key => {
-                if (key === 'libre') return;
-                const cat = categories[key];
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                
-                if (key === 'borrador') {
-                    btn.className = `p-2 rounded-lg border border-slate-300 text-xs font-bold flex items-center justify-center gap-1.5 transition bg-slate-200 text-slate-700 shadow-sm ${selectedCategory === key ? 'ring-2 ring-slate-900 ring-offset-2 scale-105' : 'hover:bg-slate-300'}`;
-                    btn.innerHTML = `
-                        <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        <span class="truncate">Borrador</span>
-                    `;
-                } else {
-                    btn.className = `p-2 rounded-lg border text-xs font-bold flex items-center justify-center gap-1.5 transition ${cat.cssClass} shadow-sm ${selectedCategory === key ? 'ring-2 ring-slate-900 ring-offset-2 scale-105' : 'opacity-85 hover:opacity-100'}`;
-                    btn.innerHTML = `
-                        <span class="w-2.5 h-2.5 rounded-full bg-white/50"></span>
-                        <span class="truncate">${cat.name}</span>
-                    `;
+            // Load saved data if available
+            const savedData = localStorage.getItem('tutoria_plan_data');
+            if(savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    gridState = parsed.gridState || gridState;
+                    document.getElementById('studentName').value = parsed.studentName || '';
+                    document.getElementById('refChallenge').value = parsed.refChallenge || '';
+                    document.getElementById('refObstacle').value = parsed.refObstacle || '';
+                    document.getElementById('refPlanB').value = parsed.refPlanB || '';
+                    renderTableGrid();
+                    updateAnalytics();
+                } catch(e) {
+                    console.error("Error loading saved state", e);
                 }
-
-                btn.onclick = () => selectCategory(key);
-                container.appendChild(btn);
-            });
-        }
-
-        function selectCategory(catKey) {
-            selectedCategory = catKey;
-            renderPalette();
-        }
-
-        function formatHour(h) {
-            return h < 10 ? `0${h}:00` : `${h}:00`;
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('scheduleBody');
-            tbody.innerHTML = '';
-
-            hours.forEach((h, hIdx) => {
-                const tr = document.createElement('tr');
-                tr.className = 'border-b border-slate-200 h-8';
-
-                const tdHour = document.createElement('td');
-                tdHour.className = 'font-bold text-slate-600 bg-slate-50 border-r border-slate-300 text-xs select-none align-middle';
-                tdHour.innerText = formatHour(h);
-                tr.appendChild(tdHour);
-
-                days.forEach((day, dIdx) => {
-                    const td = document.createElement('td');
-                    const cellData = scheduleData[hIdx][dIdx];
-                    const cat = categories[cellData.category];
-
-                    td.className = `schedule-cell border-r border-slate-200 p-0 text-center align-middle ${cat.cssClass}`;
-                    td.id = `cell-${hIdx}-${dIdx}`;
-
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.value = cellData.text;
-                    input.id = `input-${hIdx}-${dIdx}`;
-
-                    td.onmousedown = (e) => {
-                        e.preventDefault();
-                        isMouseDown = true;
-                        applyCategory(hIdx, dIdx);
-                    };
-
-                    td.onmouseenter = () => {
-                        if (isMouseDown) {
-                            applyCategory(hIdx, dIdx);
-                        }
-                    };
-
-                    input.oninput = (e) => {
-                        scheduleData[hIdx][dIdx].text = e.target.value;
-                    };
-
-                    td.appendChild(input);
-                    tr.appendChild(td);
-                });
-
-                tbody.appendChild(tr);
-            });
-        }
-
-        function applyCategory(hIdx, dIdx) {
-            if (selectedCategory === 'borrador') {
-                scheduleData[hIdx][dIdx] = { category: 'libre', text: '' };
-            } else {
-                scheduleData[hIdx][dIdx] = { 
-                    category: selectedCategory, 
-                    text: categories[selectedCategory].label 
-                };
             }
 
-            updateCellDOM(hIdx, dIdx);
-            updateSummary();
+            // Auto-save on input changes
+            document.querySelectorAll('input, textarea').forEach(elem => {
+                elem.addEventListener('input', saveDataLocally);
+            });
+        };
+
+        function renderTableGrid() {
+            const tbody = document.getElementById('scheduleTableBody');
+            tbody.innerHTML = '';
+
+            for (let h = START_HOUR; h <= END_HOUR; h++) {
+                const hourIndex = h - START_HOUR;
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
+
+                // Hour Label Cell
+                const hourFormatted = `${h < 10 ? '0' + h : h}:00`;
+                const tdHour = document.createElement('td');
+                tdHour.className = "p-2 text-center text-[11px] font-semibold text-slate-500 bg-slate-50 border-r border-b border-slate-200 select-none sticky left-0 z-10";
+                tdHour.textContent = hourFormatted;
+                tr.appendChild(tdHour);
+
+                // Days Cells
+                for (let d = 0; d < 7; d++) {
+                    const tdDay = document.createElement('td');
+                    tdDay.className = "p-1 border-r border-b border-slate-200 align-top transition-all cursor-pointer select-none grid-time-slot";
+                    
+                    const cellData = gridState[d][hourIndex];
+                    const catKey = cellData ? cellData.category : 'VACIO';
+                    const catInfo = CATEGORIES[catKey];
+
+                    if (catKey !== 'VACIO') {
+                        tdDay.innerHTML = `
+                            <div class="h-full w-full p-1.5 rounded-lg text-[10px] shadow-sm border ${catInfo.color} flex flex-col justify-between group relative overflow-hidden">
+                                <div class="flex items-center justify-between gap-1 font-bold truncate">
+                                    <span class="truncate"><i class="fa-solid ${catInfo.icon} mr-1 text-[9px]"></i>${cellData.label || catInfo.name}</span>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        tdDay.innerHTML = `
+                            <div class="h-full w-full rounded-lg border border-dashed border-slate-200 hover:border-indigo-300 text-slate-300 hover:text-indigo-400 flex items-center justify-center py-2 transition-all">
+                                <i class="fa-solid fa-plus text-[10px] opacity-0 group-hover:opacity-100"></i>
+                            </div>
+                        `;
+                    }
+
+                    tdDay.onclick = () => openModal(d, hourIndex);
+                    tr.appendChild(tdDay);
+                }
+
+                tbody.appendChild(tr);
+            }
         }
 
-        function updateCellDOM(hIdx, dIdx) {
-            const cell = document.getElementById(`cell-${hIdx}-${dIdx}`);
-            const input = document.getElementById(`input-${hIdx}-${dIdx}`);
-            const cellData = scheduleData[hIdx][dIdx];
-            const cat = categories[cellData.category];
+        function openModal(dayIndex, hourIndex) {
+            selectedDay = dayIndex;
+            selectedHourIndex = hourIndex;
+            const hour = START_HOUR + hourIndex;
+            const hourFormatted = `${hour < 10 ? '0' + hour : hour}:00 - ${hour + 1 < 10 ? '0' + (hour + 1) : hour + 1}:00`;
 
-            cell.className = `schedule-cell border-r border-slate-200 p-0 text-center align-middle ${cat.cssClass}`;
-            input.value = cellData.text;
+            document.getElementById('modalSlotInfo').textContent = `${DAYS[dayIndex]}, ${hourFormatted}`;
+            
+            const cellData = gridState[dayIndex][hourIndex];
+            if (cellData) {
+                document.getElementById('modalCategory').value = cellData.category;
+                document.getElementById('modalLabel').value = cellData.label || '';
+            } else {
+                document.getElementById('modalCategory').value = 'ESTUDIO';
+                document.getElementById('modalLabel').value = '';
+            }
+
+            // Check only current day in repeat boxes by default
+            document.querySelectorAll('.day-repeat-cb').forEach(cb => {
+                cb.checked = parseInt(cb.value) === dayIndex;
+            });
+
+            document.getElementById('activityModal').classList.remove('hidden');
         }
 
-        function updateSummary() {
-            const counts = {
-                clases: 0,
-                estudio: 0,
-                traslado: 0,
-                sueño: 0,
-                comida: 0,
-                trabajo: 0,
-                ocio: 0,
-                libre: 0
+        function closeModal() {
+            document.getElementById('activityModal').classList.add('hidden');
+        }
+
+        function saveSlotModal() {
+            const cat = document.getElementById('modalCategory').value;
+            const label = document.getElementById('modalLabel').value.trim();
+            const checkedDays = Array.from(document.querySelectorAll('.day-repeat-cb:checked')).map(cb => parseInt(cb.value));
+
+            checkedDays.forEach(dayIdx => {
+                if (cat === 'VACIO') {
+                    gridState[dayIdx][selectedHourIndex] = null;
+                } else {
+                    gridState[dayIdx][selectedHourIndex] = { category: cat, label: label };
+                }
+            });
+
+            renderTableGrid();
+            updateAnalytics();
+            saveDataLocally();
+            closeModal();
+            showToast('Actividad guardada correctamente');
+        }
+
+        function clearSlotFromModal() {
+            const checkedDays = Array.from(document.querySelectorAll('.day-repeat-cb:checked')).map(cb => parseInt(cb.value));
+            checkedDays.forEach(dayIdx => {
+                gridState[dayIdx][selectedHourIndex] = null;
+            });
+            renderTableGrid();
+            updateAnalytics();
+            saveDataLocally();
+            closeModal();
+            showToast('Bloque borrado');
+        }
+
+        function updateAnalytics() {
+            // Count total hours per category
+            let counts = {
+                SUEÑO: 0,
+                CLASES: 0,
+                ESTUDIO: 0,
+                PERSONAL: 0,
+                OCIO: 0,
+                DEPORTE: 0
             };
 
-            for (let h = 0; h < hours.length; h++) {
-                for (let d = 0; d < 7; d++) {
-                    const catKey = scheduleData[h][d].category;
-                    if (counts[catKey] !== undefined) {
-                        counts[catKey]++;
+            let totalAllocatedGrid = 0;
+
+            for (let d = 0; d < 7; d++) {
+                for (let h = 0; h < (END_HOUR - START_HOUR + 1); h++) {
+                    const item = gridState[d][h];
+                    if (item && item.category && counts.hasOwnProperty(item.category)) {
+                        counts[item.category]++;
+                        totalAllocatedGrid++;
                     }
                 }
             }
 
-            const summaryContainer = document.getElementById('summaryContainer');
-            summaryContainer.innerHTML = '';
+            // Note: Overnight sleep between 23:00 and 06:00 is 7 hrs per night = 49 hrs/week by default assumption
+            // To make total 168 hrs accurate, we calculate assigned grid + unassigned
+            const totalHoursInWeek = 168;
+            const freeHours = Math.max(0, totalHoursInWeek - totalAllocatedGrid);
 
-            Object.keys(categories).forEach(key => {
-                if (key === 'borrador') return;
-                const cat = categories[key];
-                const hrs = counts[key];
+            // Update Progress Bar & Header
+            document.getElementById('allocatedHoursText').textContent = `${totalAllocatedGrid} / ${totalHoursInWeek} hrs`;
+            document.getElementById('freeHoursText').textContent = `${freeHours} hrs sin asignar`;
 
-                const card = document.createElement('div');
-                card.className = 'p-2 rounded-lg border border-slate-200 bg-slate-50 flex flex-col justify-between';
-                card.innerHTML = `
-                    <div class="flex items-center justify-center gap-1 mb-1">
-                        <span class="w-2.5 h-2.5 rounded-full ${cat.cssClass}"></span>
-                        <span class="font-bold text-[11px] truncate text-slate-700">${cat.name.split('/')[0]}</span>
-                    </div>
-                    <div class="text-xs font-extrabold text-slate-800">${hrs} <span class="text-[10px] font-normal text-slate-500">hrs</span></div>
-                `;
-                summaryContainer.appendChild(card);
-            });
+            const getPct = (val) => ((val / totalHoursInWeek) * 100).toFixed(1) + '%';
+            document.getElementById('barSleep').style.width = getPct(counts.SUEÑO);
+            document.getElementById('barClasses').style.width = getPct(counts.CLASES);
+            document.getElementById('barStudy').style.width = getPct(counts.ESTUDIO);
+            document.getElementById('barPersonal').style.width = getPct(counts.PERSONAL);
+            document.getElementById('barLeisure').style.width = getPct(counts.OCIO);
+            document.getElementById('barSport').style.width = getPct(counts.DEPORTE);
 
-            // EVALUACIÓN DE ALERTAS EN TIEMPO REAL
-            const foodCard = document.getElementById('foodAlertCard');
-            const foodIcon = document.getElementById('foodAlertIcon');
-            const foodTitle = document.getElementById('foodAlertTitle');
-            const foodText = document.getElementById('foodAlertText');
-
-            if (counts.comida < 14) {
-                foodCard.className = "p-3 rounded-xl border flex items-start gap-2.5 bg-amber-50 border-amber-300 transition-all";
-                foodIcon.className = "p-1.5 rounded-lg bg-amber-100 text-amber-700 shrink-0 mt-0.5";
-                foodTitle.innerText = `Alimentación: Insuficiente (${counts.comida} de 14 hrs mínimas sugeridas)`;
-                foodText.innerText = `Has asignado únicamente ${counts.comida} hrs a comer. Se recomienda dedicar al menos 2 hrs diarias (14 hrs/semana) para desayunar, comer y cenar.`;
-            } else {
-                foodCard.className = "p-3 rounded-xl border flex items-start gap-2.5 bg-emerald-50 border-emerald-300 transition-all";
-                foodIcon.className = "p-1.5 rounded-lg bg-emerald-100 text-emerald-700 shrink-0 mt-0.5";
-                foodTitle.innerText = `Alimentación: Horario Adecuado (${counts.comida} hrs/semana)`;
-                foodText.innerText = `¡Correcto! Cuentas con bloques suficientes para alimentarte adecuadamente de lunes a domingo.`;
+            // Update Chart Data
+            if (chartInstance) {
+                chartInstance.data.datasets[0].data = [
+                    counts.SUEÑO,
+                    counts.CLASES,
+                    counts.ESTUDIO,
+                    counts.PERSONAL,
+                    counts.OCIO,
+                    counts.DEPORTE,
+                    freeHours
+                ];
+                chartInstance.update();
             }
 
-            const sleepCard = document.getElementById('sleepAlertCard');
-            const sleepIcon = document.getElementById('sleepAlertIcon');
-            const sleepTitle = document.getElementById('sleepAlertTitle');
-            const sleepText = document.getElementById('sleepAlertText');
+            // Chart Breakdown List
+            const listContainer = document.getElementById('chartSummaryList');
+            listContainer.innerHTML = `
+                <div class="flex justify-between items-center text-slate-600">
+                    <span><i class="fa-solid fa-moon text-indigo-600 mr-1.5"></i>Sueño:</span>
+                    <strong class="text-slate-800">${counts.SUEÑO} hrs</strong>
+                </div>
+                <div class="flex justify-between items-center text-slate-600">
+                    <span><i class="fa-solid fa-graduation-cap text-blue-600 mr-1.5"></i>Clases:</span>
+                    <strong class="text-slate-800">${counts.CLASES} hrs</strong>
+                </div>
+                <div class="flex justify-between items-center text-slate-600">
+                    <span><i class="fa-solid fa-pen-ruler text-amber-500 mr-1.5"></i>Estudio / Tareas:</span>
+                    <strong class="text-slate-800">${counts.ESTUDIO} hrs</strong>
+                </div>
+                <div class="flex justify-between items-center text-slate-600">
+                    <span><i class="fa-solid fa-utensils text-rose-500 mr-1.5"></i>Comidas & Rutina:</span>
+                    <strong class="text-slate-800">${counts.PERSONAL} hrs</strong>
+                </div>
+                <div class="flex justify-between items-center text-slate-600">
+                    <span><i class="fa-solid fa-gamepad text-emerald-500 mr-1.5"></i>Ocio & Social:</span>
+                    <strong class="text-slate-800">${counts.OCIO} hrs</strong>
+                </div>
+                <div class="flex justify-between items-center text-slate-600">
+                    <span><i class="fa-solid fa-person-running text-cyan-500 mr-1.5"></i>Deporte / Salud:</span>
+                    <strong class="text-slate-800">${counts.DEPORTE} hrs</strong>
+                </div>
+            `;
 
-            if (counts.sueño < 42) {
-                sleepCard.className = "p-3 rounded-xl border flex items-start gap-2.5 bg-rose-50 border-rose-300 transition-all";
-                sleepIcon.className = "p-1.5 rounded-lg bg-rose-100 text-rose-700 shrink-0 mt-0.5";
-                sleepTitle.innerText = `Sueño / Descanso: Nivel Bajo (${counts.sueño} de 42 hrs recomendadas)`;
-                sleepText.innerText = `Promedias ${(counts.sueño / 7).toFixed(1)} hrs de descanso al día. Se sugieren entre 6 y 8 hrs diarias para mantener un rendimiento óptimo.`;
+            // Run Tutor Reality Audit Engine
+            runTutorAudit(counts, totalAllocatedGrid, freeHours);
+        }
+
+        function runTutorAudit(counts, totalAllocated, freeHours) {
+            const badge = document.getElementById('realityBadge');
+            const badgeText = document.getElementById('realityBadgeText');
+            const feedbackContainer = document.getElementById('tutorFeedbackList');
+            feedbackContainer.innerHTML = '';
+
+            let alerts = [];
+            let status = 'REALISTA'; // REALISTA, SOBRECARGA, INCOMPLETO
+
+            // Rule 1: Sleep check
+            if (counts.SUEÑO < 35) {
+                alerts.push({
+                    type: 'danger',
+                    icon: 'fa-triangle-exclamation',
+                    text: `<strong>Alerta de Fatiga:</strong> Tienes solo ${counts.SUEÑO}h de sueño registradas en la matriz. El cerebro adolescente/estudiantil necesita mínimo 49h-56h semanales para consolidar memoria.`
+                });
+                status = 'SOBRECARGA';
+            } else if (counts.SUEÑO >= 49) {
+                alerts.push({
+                    type: 'success',
+                    icon: 'fa-circle-check',
+                    text: `<strong>Excelente descanso:</strong> Mantienes un margen saludable de sueño (~7-8h/noche).`
+                });
+            }
+
+            // Rule 2: Study overload vs unrealistic study hours
+            if (counts.ESTUDIO > 35) {
+                alerts.push({
+                    type: 'warning',
+                    icon: 'fa-battery-quarter',
+                    text: `<strong>Riesgo de Burnout:</strong> Planificaste ${counts.ESTUDIO}h de estudio autónomo. ¿Es sostenible sin sofocar tu vida personal? Sugerencia: divide en sesiones Pomodoro.`
+                });
+                status = 'SOBRECARGA';
+            } else if (counts.ESTUDIO < 5 && counts.CLASES > 15) {
+                alerts.push({
+                    type: 'info',
+                    icon: 'fa-lightbulb',
+                    text: `<strong>Poco estudio autónomo:</strong> Solo tienes ${counts.ESTUDIO}h de tareas/repaso para una carga académica alta.`
+                });
+            }
+
+            // Rule 3: Personal care check (eating/commute)
+            if (counts.PERSONAL < 10) {
+                alerts.push({
+                    type: 'warning',
+                    icon: 'fa-utensils',
+                    text: `<strong>Falacia de Tiempo:</strong> Asignaste muy pocas horas a alimentarte, higiene y traslados (${counts.PERSONAL}h). No te engañes, estas actividades consumen tiempo real.`
+                });
+            }
+
+            // Rule 4: Leisure / mental health check
+            if (counts.OCIO === 0 && counts.DEPORTE === 0) {
+                alerts.push({
+                    type: 'warning',
+                    icon: 'fa-face-frown',
+                    text: `<strong>Falta Ocio / Bienestar:</strong> Un plan 100% rígido sin esparcimiento suele abandonarse al 3er día. Añade tiempo libre.`
+                });
+            }
+
+            // Update Badge appearance based on findings
+            if (totalAllocated < 40) {
+                badge.className = "inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 shadow-sm w-full md:w-auto justify-center";
+                badgeText.textContent = "Horario en proceso (Falta llenar)";
+            } else if (status === 'SOBRECARGA') {
+                badge.className = "inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200 shadow-sm w-full md:w-auto justify-center";
+                badgeText.textContent = "⚠️ Riesgo de Carga Irreal / Exhaustivo";
             } else {
-                sleepCard.className = "p-3 rounded-xl border flex items-start gap-2.5 bg-emerald-50 border-emerald-300 transition-all";
-                sleepIcon.className = "p-1.5 rounded-lg bg-emerald-100 text-emerald-700 shrink-0 mt-0.5";
-                sleepTitle.innerText = `Sueño / Descanso: Horario Adecuado (${counts.sueño} hrs/semana)`;
-                sleepText.innerText = `¡Excelente! Mantener un ritmo regular de descanso favorece la memoria y el desempeño académico.`;
+                badge.className = "inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-sm w-full md:w-auto justify-center";
+                badgeText.textContent = "✅ Plan Semanal Equilibrado y Realista";
+            }
+
+            // Render Alert Cards
+            if (alerts.length === 0) {
+                feedbackContainer.innerHTML = `<p class="text-slate-500 italic">Llena tu agenda para recibir consejos de tutoría personalizada.</p>`;
+            } else {
+                alerts.forEach(al => {
+                    const div = document.createElement('div');
+                    let bgClass = "bg-slate-50 border-slate-200 text-slate-700";
+                    if (al.type === 'danger') bgClass = "bg-rose-50 border-rose-200 text-rose-900";
+                    if (al.type === 'warning') bgClass = "bg-amber-50 border-amber-200 text-amber-900";
+                    if (al.type === 'success') bgClass = "bg-emerald-50 border-emerald-200 text-emerald-900";
+                    if (al.type === 'info') bgClass = "bg-blue-50 border-blue-200 text-blue-900";
+
+                    div.className = `p-2.5 rounded-xl border ${bgClass} flex items-start gap-2.5`;
+                    div.innerHTML = `<i class="fa-solid ${al.icon} mt-0.5 text-sm"></i> <div>${al.text}</div>`;
+                    feedbackContainer.appendChild(div);
+                });
             }
         }
 
-        function clearSchedule() {
-            scheduleData = Array(hours.length).fill(null).map(() => 
-                Array(7).fill(null).map(() => ({ category: 'libre', text: '' }))
-            );
-            renderTable();
-            updateSummary();
+        function initChart() {
+            const ctx = document.getElementById('balanceChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Sueño', 'Clases', 'Estudio', 'Personal', 'Ocio', 'Deporte', 'Disponible'],
+                    datasets: [{
+                        data: [0, 0, 0, 0, 0, 0, 168],
+                        backgroundColor: [
+                            CATEGORIES.SUEÑO.hex,
+                            CATEGORIES.CLASES.hex,
+                            CATEGORIES.ESTUDIO.hex,
+                            CATEGORIES.PERSONAL.hex,
+                            CATEGORIES.OCIO.hex,
+                            CATEGORIES.DEPORTE.hex,
+                            CATEGORIES.VACIO.hex
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.raw} hrs`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '68%'
+                }
+            });
+        }
+
+        function addPreset(type) {
+            if (type === 'SUEÑO') {
+                // Add 22:00 and 23:00 + 06:00 to 07:00 as sleep for all 7 days
+                for (let d = 0; d < 7; d++) {
+                    gridState[d][0] = { category: 'SUEÑO', label: 'Sueño Reparador' }; // 06:00
+                    gridState[d][END_HOUR - START_HOUR - 1] = { category: 'SUEÑO', label: 'Sueño Nocturno' }; // 22:00
+                    gridState[d][END_HOUR - START_HOUR] = { category: 'SUEÑO', label: 'Sueño Nocturno' };     // 23:00
+                }
+                showToast('Añadido bloque de sueño básico a todos los días');
+            } else if (type === 'COMIDA') {
+                // Add 14:00 (Lunch) & 20:00 (Dinner/Hygiene)
+                for (let d = 0; d < 7; d++) {
+                    gridState[d][14 - START_HOUR] = { category: 'PERSONAL', label: 'Comida y Aseo' };
+                    gridState[d][20 - START_HOUR] = { category: 'PERSONAL', label: 'Cena y Rutina' };
+                }
+                showToast('Añadido bloque de comidas y rutina personal');
+            } else if (type === 'TRASLADO') {
+                // Add 06:00 (Going to school) and 14:00 (Returning) Mon-Fri
+                for (let d = 0; d < 5; d++) {
+                    gridState[d][1] = { category: 'PERSONAL', label: 'Traslado / Transporte' }; // 07:00
+                }
+                showToast('Añadido tiempo de traslados (L-V)');
+            } else if (type === 'CLASES_STD') {
+                // Mon-Fri 08:00 to 13:00
+                for (let d = 0; d < 5; d++) {
+                    for (let h = 8; h <= 13; h++) {
+                        gridState[d][h - START_HOUR] = { category: 'CLASES', label: 'Horario Escolar' };
+                    }
+                }
+                showToast('Añadido horario de clases matutino (L-V)');
+            }
+
+            renderTableGrid();
+            updateAnalytics();
+            saveDataLocally();
+        }
+
+        function applyPresetWizard() {
+            document.getElementById('wizardModal').classList.remove('hidden');
+        }
+
+        function closeWizard() {
+            document.getElementById('wizardModal').classList.add('hidden');
+        }
+
+        function executeWizard() {
+            const sleepHrs = parseInt(document.getElementById('wizSleep').value);
+            const classesSchedule = document.getElementById('wizClasses').value;
+            const commuteHrs = parseInt(document.getElementById('wizCommute').value);
+
+            // 1. Sleep allocation
+            for (let d = 0; d < 7; d++) {
+                gridState[d][0] = { category: 'SUEÑO', label: 'Sueño' }; // 06:00
+                gridState[d][16] = { category: 'SUEÑO', label: 'Sueño' }; // 22:00
+                gridState[d][17] = { category: 'SUEÑO', label: 'Sueño' }; // 23:00
+            }
+
+            // 2. Classes allocation (Mon-Fri)
+            if (classesSchedule === '7-14') {
+                for (let d = 0; d < 5; d++) {
+                    for (let h = 7; h <= 13; h++) {
+                        gridState[d][h - START_HOUR] = { category: 'CLASES', label: 'Clases' };
+                    }
+                }
+            } else if (classesSchedule === '8-15') {
+                for (let d = 0; d < 5; d++) {
+                    for (let h = 8; h <= 14; h++) {
+                        gridState[d][h - START_HOUR] = { category: 'CLASES', label: 'Clases' };
+                    }
+                }
+            } else if (classesSchedule === '14-20') {
+                for (let d = 0; d < 5; d++) {
+                    for (let h = 14; h <= 19; h++) {
+                        gridState[d][h - START_HOUR] = { category: 'CLASES', label: 'Clases' };
+                    }
+                }
+            }
+
+            // 3. Daily meals & personal care
+            for (let d = 0; d < 7; d++) {
+                gridState[d][13 - START_HOUR] = { category: 'PERSONAL', label: 'Comida / Descanso' };
+                gridState[d][20 - START_HOUR] = { category: 'PERSONAL', label: 'Cena / Rutina' };
+            }
+
+            closeWizard();
+            renderTableGrid();
+            updateAnalytics();
+            saveDataLocally();
+            showToast('Estructura base cargada con éxito');
+        }
+
+        function resetWeeklyGrid() {
+            gridState = Array(7).fill(null).map(() => Array(END_HOUR - START_HOUR + 1).fill(null));
+            renderTableGrid();
+            updateAnalytics();
+            saveDataLocally();
+            showToast('Horario limpiado por completo');
+        }
+
+        function saveDataLocally() {
+            const data = {
+                gridState: gridState,
+                studentName: document.getElementById('studentName').value,
+                refChallenge: document.getElementById('refChallenge').value,
+                refObstacle: document.getElementById('refObstacle').value,
+                refPlanB: document.getElementById('refPlanB').value
+            };
+            localStorage.setItem('tutoria_plan_data', JSON.stringify(data));
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastMessage').textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        function exportSummaryPDF() {
+            const name = document.getElementById('studentName').value.trim() || 'Estudiante';
+            document.getElementById('printStudentName').textContent = name;
+            document.getElementById('printDate').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            document.getElementById('printRef1').textContent = document.getElementById('refChallenge').value || 'Sin especificar';
+            document.getElementById('printRef2').textContent = document.getElementById('refObstacle').value || 'Sin especificar';
+            document.getElementById('printRef3').textContent = document.getElementById('refPlanB').value || 'Sin especificar';
+
+            // Populate Print Hours
+            const printSummary = document.getElementById('printHoursSummary');
+            printSummary.innerHTML = document.getElementById('chartSummaryList').innerHTML;
+
+            // Populate Diagnostics
+            const printDiag = document.getElementById('printDiagnostics');
+            printDiag.innerHTML = document.getElementById('tutorFeedbackList').innerHTML;
+
+            window.print();
+        }
+
+        function updateModalDefaults() {
+            const cat = document.getElementById('modalCategory').value;
+            const labelInput = document.getElementById('modalLabel');
+            if (!labelInput.value) {
+                if (cat === 'SUEÑO') labelInput.value = 'Sueño / Descanso';
+                if (cat === 'CLASES') labelInput.value = 'Clases';
+                if (cat === 'ESTUDIO') labelInput.value = 'Estudio / Tareas';
+                if (cat === 'PERSONAL') labelInput.value = 'Comidas / Personal';
+                if (cat === 'OCIO') labelInput.value = 'Tiempo Libre';
+                if (cat === 'DEPORTE') labelInput.value = 'Ejercicio';
+            }
         }
     </script>
 </body>
-</html>
